@@ -2081,7 +2081,8 @@ const FAV = {
   weather: '<rect width="16" height="16" rx="3" fill="#3d7fc4"/><circle cx="8" cy="8" r="3.6" fill="#ffd34d"/>',
   train: '<rect width="16" height="16" rx="3" fill="#2e8b57"/><rect x="4" y="3" width="8" height="8" rx="1.5" fill="#fff"/><rect x="5.2" y="4.4" width="5.6" height="3" fill="#2e8b57"/><path d="M5.5 13.5l1-2.2M10.5 13.5l-1-2.2" stroke="#fff" stroke-width="1.2"/>',
   recipe: '<rect width="16" height="16" rx="8" fill="#e8742a"/><path d="M3.5 8.5h9a4.5 4.5 0 0 1-9 0z" fill="#fff"/>',
-  news: '<rect width="16" height="16" rx="2" fill="#333"/><path d="M4 5h8M4 8h8M4 11h5" stroke="#fff" stroke-width="1.4"/>',
+  // 黒っぽい絵は暗い背景にまぎれるので、明るい縁を付けておく（明るい背景ではほとんど目立たない）
+  news: '<rect x=".5" y=".5" width="15" height="15" rx="2" fill="#333" stroke="#fff" stroke-opacity=".5"/><path d="M4 5h8M4 8h8M4 11h5" stroke="#fff" stroke-width="1.4"/>',
   map: '<path d="M8 1a5 5 0 0 1 5 5c0 4-5 9-5 9S3 10 3 6a5 5 0 0 1 5-5z" fill="#1f8a84"/><circle cx="8" cy="6" r="2" fill="#fff"/>',
   dict: '<rect x="2" y="1" width="12" height="14" rx="1.5" fill="#6b4c9a"/><path d="M5 4.5h6" stroke="#fff" stroke-width="1.4"/>',
 };
