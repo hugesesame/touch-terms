@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Touch Terms</title>
+<meta name="description" content="Webデザインの用語を、見本のサイトに触って覚える教材アプリ。架空のカフェのサイトで、ヘッダーやマージンなど26語を「見る・触る・確かめる」で学べます。">
+<!-- ファビコン：タップの波紋（指で触れた点と、広がる輪） -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c2381a'/%3E%3Ccircle cx='16' cy='16' r='4.5' fill='%23fffaf0'/%3E%3Ccircle cx='16' cy='16' r='9.5' fill='none' stroke='%23fffaf0' stroke-width='2.4' opacity='.75'/%3E%3C/svg%3E">
 <style>
 /* ============================================================
    アプリ本体の見た目（赤ペンの校正紙）
@@ -56,7 +59,7 @@ button { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--line);
 }
 .brand { font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
-.brand small { font-weight: 400; color: var(--ink-2); margin-left: 8px; font-size: 12px; }
+.brand small { font-family: var(--mono); font-weight: 400; color: var(--ink-2); margin-left: 8px; font-size: 12px; }
 .bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .bar .progress { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-right: 8px; white-space: nowrap; }
 .bar-btn {
@@ -640,7 +643,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 <body>
 
 <header class="bar">
-  <div class="brand"><span data-t="app.name"></span><small data-t="app.note"></small></div>
+  <div class="brand"><span data-t="app.name"></span><small id="version"></small></div>
   <button type="button" class="bar-btn" id="open-list" aria-haspopup="dialog">
     <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
     <span data-t="app.list"></span>
@@ -835,7 +838,6 @@ const TEXT = {
   ja: {
     app: {
       name: 'Touch Terms',
-      note: '試作版',
       stageLabel: '見本のサイト',
       list: '用語一覧',
       close: '閉じる',
@@ -1834,6 +1836,7 @@ const CHAPTERS = [
 ];
 const TERMS = CHAPTERS.flatMap((c) => c.terms);
 const chapterOf = (id) => CHAPTERS.find((c) => c.terms.includes(id));
+const VERSION = '0.9';   // 画面の名前の横に出す版の番号
 const STEPS = ['look', 'touch', 'check'];
 const DEFAULT = { space: 1, lh: 1.8 };
 const PATHS = { home: '', menu: 'menu/', item: 'menu/{id}/', reserve: 'reserve/', share: '' };
@@ -1940,6 +1943,7 @@ function buildSite() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
   $('#s-burger').setAttribute('aria-label', t('site.burger'));
+  $('#version').textContent = `v${VERSION}`;
   $('.s-foot-nav').setAttribute('aria-label', t('site.footer.links'));
 
   $('#s-menu').replaceChildren(...t('site.menu.items').flatMap((m) => [
@@ -2221,7 +2225,9 @@ track.addEventListener('scroll', () => {
 
 /* ---- モーダルとドロワー ---- */
 const layer = $('#s-layer');
+let layerOpener = null;   // モーダルやドロワーを開いたボタン（閉じたら、そこへ戻る）
 function openLayer(kind) {
+  layerOpener = document.activeElement;
   state.layer = kind;
   const box = kind === 'modal' ? $('#s-modal') : $('#s-drawer');
   if (kind === 'modal') {
@@ -2255,6 +2261,9 @@ function closeLayer(via) {
   state.layer = null;
   layer.hidden = true;
   vp.classList.remove('locked');
+  // キーボードで使っている人が迷わないよう、開いたボタンへ戻す（移動したときは戻さない）
+  if (via !== 'nav' && layerOpener?.isConnected && site.contains(layerOpener)) layerOpener.focus({ preventScroll: true });
+  layerOpener = null;
   notify(kind, { open: false, via });
   draw();
 }
@@ -2267,6 +2276,15 @@ $('#s-backdrop').addEventListener('click', () => closeLayer('backdrop'));
 $('#s-burger').addEventListener('click', () => { if (!isQuiz()) openLayer('drawer'); });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && state.layer && !$('#list').open) closeLayer('esc');
+  // 開いている間は、Tab で後ろのページへ出ていかないようにする
+  if (e.key === 'Tab' && state.layer) {
+    const box = state.layer === 'modal' ? $('#s-modal') : $('#s-drawer');
+    const items = [...box.querySelectorAll('button, a[href]')];
+    const first = items[0], last = items[items.length - 1];
+    if (!box.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
 });
 
 /* ============================================================
