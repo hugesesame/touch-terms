@@ -57,6 +57,7 @@ button { font: inherit; color: inherit; }
 }
 .brand { font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
 .brand small { font-weight: 400; color: var(--ink-2); margin-left: 8px; font-size: 12px; }
+.bar nav { min-width: 0; }
 .terms {
   display: flex;
   gap: 4px;
@@ -64,7 +65,6 @@ button { font: inherit; color: inherit; }
   padding: 0;
   list-style: none;
   overflow-x: auto;
-  min-width: 0;
   scrollbar-width: none;
 }
 .terms button {
@@ -82,8 +82,7 @@ button { font: inherit; color: inherit; }
 }
 .terms .num { font-family: var(--mono); font-size: 12px; }
 .terms button[aria-current="step"] { color: var(--ink); border-bottom-color: var(--pen); font-weight: 600; }
-.terms button:disabled { cursor: default; opacity: .55; }
-.terms .soon { font-size: 11px; }
+@media (hover: hover) { .terms button:hover { color: var(--ink); } }
 .stamp {
   display: inline-grid;
   place-items: center;
@@ -118,15 +117,15 @@ button { font: inherit; color: inherit; }
   border: 1px solid var(--line);
   border-radius: 6px;
   overflow: hidden;
-  background: #fff;
+  background: var(--paper-2);   /* 画面を低くしたとき、残りは「画面の外」に見える */
 }
 .browser-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   height: 34px;
+  flex: none;
   padding: 0 12px;
-  background: var(--paper-2);
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
   font-size: 12px;
@@ -134,7 +133,7 @@ button { font: inherit; color: inherit; }
 }
 .browser-bar .dots { display: flex; gap: 5px; }
 .browser-bar .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
-.viewport { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.viewport { flex: 1; min-height: 0; overflow: auto; position: relative; background: #fff; }
 
 /* ---- 右の説明パネル ---- */
 .count { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin: 0; }
@@ -167,7 +166,7 @@ button { font: inherit; color: inherit; }
 .parts button {
   width: 100%;
   display: grid;
-  grid-template-columns: 7.5em 1fr;
+  grid-template-columns: 8em 1fr;
   gap: 12px;
   padding: 10px 4px;
   border: 0;
@@ -193,6 +192,33 @@ button { font: inherit; color: inherit; }
 .switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--ink-2); transition: transform .15s; }
 .switch input:checked { background: var(--pen); border-color: var(--pen); }
 .switch input:checked::after { transform: translateX(18px); background: var(--paper); }
+
+/* つまみ */
+.range { margin: 4px 0 16px; }
+.range label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600; }
+.range output { font-family: var(--mono); font-size: 13px; font-weight: 400; color: var(--pen); }
+.range input { width: 100%; margin: 10px 0 0; accent-color: var(--pen); }
+.verdict { min-height: 5.5em; }
+.verdict b { color: var(--pen); margin-right: 6px; }
+
+/* 行間の見比べ */
+.choices { display: grid; gap: 10px; margin: 0 0 16px; }
+.choices button {
+  display: grid;
+  grid-template-columns: 1.5em 1fr;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.choices .key { font-family: var(--mono); font-weight: 700; color: var(--ink-2); line-height: 1.6; }
+.choices .sample { font-size: 13px; }
+.choices button[aria-pressed="true"] { border-color: var(--pen); box-shadow: inset 0 0 0 1px var(--pen); }
+.choices button[aria-pressed="true"] .key { color: var(--pen); }
+@media (hover: hover) { .choices button:hover { background: var(--paper-2); } }
 
 .feedback { min-height: 3.5em; }
 .feedback .label { font-weight: 700; margin-right: 6px; }
@@ -238,12 +264,16 @@ button { font: inherit; color: inherit; }
   paint-order: stroke;
   stroke-linejoin: round;
 }
+.overlay text.tag { fill: #fffaf0; stroke: none; font-size: 12px; }
 
 /* ============================================================
    教材：架空のカフェのサイト「ひだまり珈琲店」
-   アプリとは別のお店の見た目にしている
+   アプリとは別のお店の見た目にしている。
+   --sp（余白の倍率）と --lh（行の高さ）は、つまみで変えられる
    ============================================================ */
 .site {
+  --sp: 1;
+  --lh: 1.8;
   --c-bg: #f7f0e3;
   --c-paper: #fbf6ec;
   --c-ink: #3b2a1f;
@@ -258,62 +288,71 @@ button { font: inherit; color: inherit; }
   color: var(--c-ink);
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.8;
+  line-height: var(--lh);
 }
 .site [hidden] { display: none !important; }
 .site.quiz [data-part] { cursor: pointer; }
 .site a { color: inherit; text-decoration: none; }
+.site .cramped { --sp: .12; }   /* 「余白」の確かめる用：わざと余白を詰めた場所 */
 
 .s-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px 32px;
+  padding: calc(16px * var(--sp)) calc(32px * var(--sp));
   background: var(--c-paper);
   border-bottom: 1px solid var(--c-line);
+  line-height: 1.6;
 }
 .s-logo { display: flex; align-items: center; gap: 10px; font-family: var(--c-serif); font-weight: 700; font-size: 19px; letter-spacing: .06em; }
-.s-nav ul { display: flex; gap: 24px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.s-nav ul { display: flex; gap: calc(24px * var(--sp)); margin: 0; padding: 0; list-style: none; font-size: 14px; }
 .s-nav a { border-bottom: 1px solid transparent; padding-bottom: 2px; }
 .s-nav a:hover { border-bottom-color: var(--c-accent); }
 
-.s-fv {
+.s-hero {
   display: grid;
   grid-template-columns: 1.15fr .85fr;
   align-items: center;
-  gap: 32px;
-  padding: 64px 32px 72px;
+  gap: calc(32px * var(--sp));
+  padding: calc(64px * var(--sp)) calc(32px * var(--sp)) calc(72px * var(--sp));
 }
-.s-fv h1 { font-family: var(--c-serif); font-size: 34px; line-height: 1.45; margin: 0 0 16px; letter-spacing: .04em; }
-.s-fv p { margin: 0 0 28px; color: var(--c-sub); }
-.s-btn { display: inline-block; padding: 11px 22px; background: var(--c-accent); color: #fbf6ec !important; border-radius: 3px; font-size: 14px; letter-spacing: .06em; }
-.s-fv svg { width: 100%; max-width: 280px; justify-self: center; }
+.s-hero h1 { font-family: var(--c-serif); font-size: 34px; line-height: 1.45; margin: 0 0 calc(16px * var(--sp)); letter-spacing: .04em; }
+.s-hero p { margin: 0 0 calc(28px * var(--sp)); color: var(--c-sub); }
+.s-btn { display: inline-block; padding: 11px 22px; background: var(--c-accent); color: #fbf6ec !important; border-radius: 3px; font-size: 14px; letter-spacing: .06em; line-height: 1.6; }
+.s-hero svg { width: 100%; max-width: 280px; justify-self: center; }
 
-.s-section { padding: 56px 32px; border-top: 1px solid var(--c-line); }
-.s-section h2 { font-family: var(--c-serif); font-size: 22px; margin: 0 0 24px; letter-spacing: .08em; }
+.s-section { padding: calc(56px * var(--sp)) calc(32px * var(--sp)); border-top: 1px solid var(--c-line); }
+.s-section h2 { font-family: var(--c-serif); font-size: 22px; line-height: 1.5; margin: 0 0 calc(24px * var(--sp)); letter-spacing: .08em; }
 .s-menu { margin: 0; max-width: 560px; }
 .s-menu .row { display: flex; align-items: baseline; gap: 12px; font-weight: 600; }
 .s-menu .row::after { content: ""; order: 1; flex: 1; border-bottom: 1px dotted var(--c-sub); transform: translateY(-4px); }
 .s-menu .price { order: 2; font-family: var(--c-serif); }
-.s-menu dd { margin: 4px 0 22px; color: var(--c-sub); font-size: 14px; }
-.s-info { display: grid; grid-template-columns: 7em 1fr; gap: 10px 16px; margin: 0; max-width: 560px; }
+.s-menu dd { margin: calc(4px * var(--sp)) 0 calc(22px * var(--sp)); color: var(--c-sub); font-size: 14px; }
+.s-menu dd:last-child { margin-bottom: 0; }
+.s-about p { margin: 0; max-width: 34em; }
+.s-news { list-style: none; margin: 0; padding: 0; max-width: 560px; }
+.s-news li { display: grid; grid-template-columns: 6em 1fr; gap: 12px; padding: calc(12px * var(--sp)) 0; border-bottom: 1px solid var(--c-line); }
+.s-news li:first-child { padding-top: 0; }
+.s-news time { color: var(--c-sub); font-size: 14px; }
+.s-info { display: grid; grid-template-columns: 7em 1fr; gap: calc(10px * var(--sp)) calc(16px * var(--sp)); margin: 0; max-width: 560px; }
 .s-info dt { color: var(--c-sub); font-size: 14px; }
 .s-info dd { margin: 0; }
 
-.s-footer { padding: 28px 32px; background: #3b2a1f; color: #e9dcc6; font-size: 13px; }
+.s-footer { padding: calc(28px * var(--sp)) calc(32px * var(--sp)); background: #3b2a1f; color: #e9dcc6; font-size: 13px; }
 .s-footer p { margin: 0; }
 .s-footer p + p { margin-top: 4px; color: #bfae95; }
 
 /* 見本サイト自身のレスポンシブ（見本の枠の幅で切り替わる） */
 @container (max-width: 620px) {
-  .s-header { flex-direction: column; align-items: flex-start; padding: 14px 20px; gap: 8px; }
-  .s-nav ul { gap: 16px; flex-wrap: wrap; }
-  .s-fv { grid-template-columns: 1fr; padding: 36px 20px 44px; gap: 20px; }
-  .s-fv h1 { font-size: 26px; }
-  .s-fv svg { max-width: 140px; justify-self: start; grid-row: 1; }
-  .s-section { padding: 40px 20px; }
-  .s-footer { padding: 24px 20px; }
+  .s-header { flex-direction: column; align-items: flex-start; padding: calc(14px * var(--sp)) calc(20px * var(--sp)); gap: 8px; }
+  .s-nav ul { gap: calc(16px * var(--sp)); flex-wrap: wrap; }
+  .s-hero { grid-template-columns: 1fr; padding: calc(36px * var(--sp)) calc(20px * var(--sp)) calc(44px * var(--sp)); gap: calc(20px * var(--sp)); }
+  .s-hero h1 { font-size: 26px; }
+  .s-hero svg { max-width: 140px; justify-self: start; grid-row: 1; }
+  .s-section { padding: calc(40px * var(--sp)) calc(20px * var(--sp)); }
+  .s-news li { grid-template-columns: 1fr; gap: 0; }
+  .s-footer { padding: calc(24px * var(--sp)) calc(20px * var(--sp)); }
 }
 </style>
 </head>
@@ -350,19 +389,19 @@ button { font: inherit; color: inherit; }
             </a>
             <nav class="s-nav" data-part="nav">
               <ul>
-                <li><a href="#" data-t="site.nav.menu"></a></li>
-                <li><a href="#" data-t="site.nav.about"></a></li>
-                <li><a href="#" data-t="site.nav.access"></a></li>
-                <li><a href="#" data-t="site.nav.news"></a></li>
+                <li><a href="#" data-go="menu" data-t="site.nav.menu"></a></li>
+                <li><a href="#" data-go="about" data-t="site.nav.about"></a></li>
+                <li><a href="#" data-go="info" data-t="site.nav.access"></a></li>
+                <li><a href="#" data-go="news" data-t="site.nav.news"></a></li>
               </ul>
             </nav>
           </header>
 
-          <section class="s-fv" data-part="fv">
+          <section class="s-hero" data-part="hero">
             <div>
-              <h1 data-t="site.fv.title"></h1>
-              <p data-t="site.fv.body"></p>
-              <a href="#" class="s-btn" data-t="site.fv.button"></a>
+              <h1 data-t="site.hero.title"></h1>
+              <p data-t="site.hero.body"></p>
+              <a href="#" class="s-btn" data-t="site.hero.button"></a>
             </div>
             <svg viewBox="0 0 240 200" aria-hidden="true">
               <circle cx="150" cy="78" r="62" fill="#f1dcb4"/>
@@ -379,9 +418,19 @@ button { font: inherit; color: inherit; }
             <dl class="s-menu" id="s-menu"></dl>
           </section>
 
+          <section class="s-section s-about" data-part="about">
+            <h2 data-t="site.about.title"></h2>
+            <p id="s-about-text" data-t="site.about.body"></p>
+          </section>
+
           <section class="s-section" data-part="info">
             <h2 data-t="site.info.title"></h2>
             <dl class="s-info" id="s-info"></dl>
+          </section>
+
+          <section class="s-section" data-part="news">
+            <h2 data-t="site.news.title"></h2>
+            <ul class="s-news" id="s-news"></ul>
           </section>
 
           <footer class="s-footer" data-part="footer">
@@ -412,26 +461,32 @@ const TEXT = {
       note: '試作版',
       termsLabel: '学ぶ用語',
       stageLabel: '見本のサイト',
-      soon: '準備中',
       done: '済',
       doneLabel: '学習済み',
       count: '用語 {n} / {total}',
       steps: { look: '見る', touch: '触る', check: '確かめる' },
       next: '次へ：{step}',
+      nextTerm: '次の用語へ：{name}',
+      allDone: '5つの用語を、すべて学び終わりました。',
       retry: 'もう一度',
+      reset: 'もとに戻す',
       ok: '正解',
       ng: 'ちがいます',
+      keys: 'キーボードでは Tab で場所を選び、Enter で答えられます。',
     },
     parts: {
       header: 'ヘッダー',
       logo: 'ロゴ',
       nav: 'ナビゲーション',
-      fv: 'ファーストビュー',
+      hero: 'メインビジュアル',
       menu: 'メニュー',
+      about: 'お店について',
       info: '営業時間・アクセス',
+      news: 'お知らせ',
       footer: 'フッター',
     },
     terms: {
+      /* ---------- 1. ヘッダー ---------- */
       header: {
         name: 'ヘッダー',
         en: 'Header',
@@ -440,8 +495,8 @@ const TEXT = {
           p1: '見本のサイトで、赤い線で囲んだところがヘッダーです。',
           p2: 'このヘッダーには、次の2つが入っています。押すと、見本の中で場所を示します。',
           items: [
-            { part: 'logo', desc: 'お店やサイトの名前・マーク' },
-            { part: 'nav', desc: 'ほかのページへの入り口' },
+            { id: 'logo', label: 'ロゴ', desc: 'お店やサイトの名前・マーク' },
+            { id: 'nav', label: 'ナビゲーション', desc: 'ほかのページへの入り口' },
           ],
           p3: 'ヘッダーは、ほとんどのサイトで全ページ共通です。どのページにいても、ここを見れば「どこのサイトか」「どこへ行けるか」がわかります。',
           tip: '見本のほかの場所にも、マウスを乗せて（スマホではタップして）みましょう。それぞれの名前が出ます。',
@@ -453,23 +508,150 @@ const TEXT = {
         },
         check: {
           q: '見本の中で、ヘッダーだと思う場所をクリック（スマホではタップ）してください。',
-          keys: 'キーボードでは Tab で場所を選び、Enter で答えられます。',
           correct: 'ページのいちばん上の帯がヘッダーです。',
           correctSub: 'そこはヘッダーの中の「{name}」でした。{name}も、ヘッダーの一部です。',
           wrong: 'そこは「{name}」です。ヘッダーは、ページのいちばん上にあります。',
-          done: 'これで「ヘッダー」は学び終わりです。次の用語は準備中です。',
         },
       },
-      nav: { name: 'ナビゲーション', en: 'Navigation' },
-      fv: { name: 'ファーストビュー', en: 'Above the Fold' },
-      space: { name: '余白', en: 'Whitespace' },
-      lineHeight: { name: '行間', en: 'Line Height' },
+
+      /* ---------- 2. ナビゲーション ---------- */
+      nav: {
+        name: 'ナビゲーション',
+        en: 'Navigation',
+        lead: 'サイトの中で、ほかのページや場所へ移動するための入り口の集まり。',
+        look: {
+          p1: '見本で、赤い線で囲んだところがナビゲーションです。ヘッダーの中にあります。',
+          p2: 'ひとつひとつの項目が、それぞれのページへの入り口です。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'menu', label: 'メニュー', desc: '飲み物や食べ物の一覧へ' },
+            { id: 'about', label: 'お店について', desc: 'お店の紹介へ' },
+            { id: 'info', label: 'アクセス', desc: '営業時間と行き方へ' },
+            { id: 'news', label: 'お知らせ', desc: 'お休みや新しいメニューの案内へ' },
+          ],
+          p3: 'どのページにも同じナビゲーションがあるので、いつでも行きたい場所へ移動できます。サイト全体で共通のものを「グローバルナビゲーション」と呼ぶこともあります。',
+          tip: 'スマホでは、ナビゲーションが「≡」の形のボタンの中にしまわれていることがあります。この形のボタンは「ハンバーガーメニュー」と呼ばれます。',
+        },
+        touch: {
+          p1: 'ナビゲーションの項目を押してみましょう。見本の中で、その場所へ移動します。',
+          moved: '「{name}」へ移動しました。ナビゲーションがあると、長いページでも行きたい場所へすぐ行けます。',
+          back: 'ほかの項目も試すには、見本を上へスクロールするか、下のボタンを押します。',
+          top: 'ページの先頭へ戻る',
+        },
+        check: {
+          q: '見本の中で、ナビゲーションだと思う場所をクリック（スマホではタップ）してください。',
+          correct: 'ヘッダーの中で、ページの名前が並んでいるところがナビゲーションです。',
+          near: 'そこは「{name}」です。ナビゲーションは、そのすぐ近くにあります。',
+          wrong: 'そこは「{name}」です。ナビゲーションは、ページの上のほうで、ほかのページの名前が並んでいるところです。',
+        },
+      },
+
+      /* ---------- 3. ファーストビュー ---------- */
+      fv: {
+        name: 'ファーストビュー',
+        en: 'Above the Fold',
+        lead: 'ページを開いたとき、スクロールしないで見える範囲のこと。',
+        look: {
+          p1: '見本では、赤い線より上がファーストビューです。線より下は、スクロールしないと見えません。見本を少し下へスクロールして、線の位置を確かめてみましょう。',
+          p2: 'このサイトのファーストビューには、次のものが入っています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'logo', label: 'ロゴ', desc: '何のお店のサイトか' },
+            { id: 'nav', label: 'ナビゲーション', desc: 'どこへ行けるか' },
+            { id: 'hero', label: 'メインビジュアル', desc: 'ページの顔になる、大きな見出しと絵' },
+          ],
+          p3: '訪れた人の多くは、ファーストビューを見て「読み進めるかどうか」を決めます。だから「何のサイトか」「次に何をすればいいか」を、ここに入れます。',
+          tip: 'ファーストビューは和製英語です。英語では "above the fold"（新聞の折り目より上）と言います。',
+        },
+        touch: {
+          p1: 'つまみを動かして、見本の画面の高さを変えてみましょう。スマホのように画面が低いと、ファーストビューに入るものが減ります。',
+          label: '画面の高さ',
+          value: '{n}px',
+          inside: 'ファーストビューに入っているもの：{list}',
+          outside: '入りきらなかったもの：{list}',
+          none: 'なし',
+          warn: '「メニューを見る」ボタンが外れると、押してもらえる機会が減ってしまいます。',
+          targets: {
+            logo: 'ロゴ',
+            nav: 'ナビゲーション',
+            title: '見出し',
+            button: '「メニューを見る」ボタン',
+            art: 'カップの絵',
+          },
+        },
+        check: {
+          q: 'ファーストビューに入っていないものを探して、クリック（スマホではタップ）してください。見本をスクロールして探しましょう。',
+          correct: '「{name}」は、スクロールしないと見えないので、ファーストビューの外です。赤い線より上がファーストビューでした。',
+          wrong: 'そこは、ページを開いたときに見えている場所なので、ファーストビューの中です。下へスクロールして探してみましょう。',
+          fold: 'ここまでがファーストビュー',
+        },
+        fold: 'ここまでがファーストビュー',
+      },
+
+      /* ---------- 4. 余白 ---------- */
+      space: {
+        name: '余白',
+        en: 'Whitespace',
+        lead: '文字や画像のまわりにある、何も置かれていない空きのこと。',
+        look: {
+          p1: '見本の赤い斜線のところが余白です。数字は、その余白の大きさ（px＝ピクセル）です。',
+          p2: '余白には、次のような役目があります。押すと、その余白だけを示します。',
+          items: [
+            { id: 'section', label: 'まとまりのあいだ', desc: '「ここから別の話」と区切る' },
+            { id: 'heading', label: '見出しと中身', desc: '見出しがどこにかかるかを示す' },
+            { id: 'item', label: '品物どうし', desc: 'ひとつずつを見分けやすくする' },
+          ],
+          p3: '何も置かれていないのに、余白は「どこからどこまでがひとまとまりか」を伝えています。人は、近いものは仲間、離れているものは別のもの、と感じるからです。',
+          tip: '余白には「内側の余白（パディング）」と「外側の余白（マージン）」の2種類があります。名前は、あとで覚えれば大丈夫です。',
+        },
+        touch: {
+          p1: 'つまみを動かして、見本の余白を広げたり詰めたりしてみましょう。',
+          label: '余白の大きさ',
+          value: '{n}%',
+          tight: ['詰まりすぎ', 'まとまりの区切りがわからず、文字がぎっしりで読みにくくなりました。'],
+          ok: ['ちょうどいい', 'まとまりごとに区切られていて、読みやすい広さです。'],
+          loose: ['空きすぎ', 'まとまりがばらばらに見え、スクロールも長くなりました。'],
+          zero: 'ゼロにする',
+        },
+        check: {
+          q: '見本の中に、余白が足りなくて窮屈な場所がひとつあります。スクロールして探し、クリック（スマホではタップ）してください。',
+          correct: '「営業時間・アクセス」だけ、余白がほとんどありません。ほかの部分と見比べると、窮屈なのがわかりますね。',
+          wrong: 'そこは「{name}」です。ここの余白は足りています。ほかの場所と見比べて、窮屈に見えるところを探してみましょう。',
+        },
+      },
+
+      /* ---------- 5. 行間 ---------- */
+      lineHeight: {
+        name: '行間',
+        en: 'Line Height',
+        lead: '文章の、行と行のあいだの広さのこと。',
+        look: {
+          p1: '見本の「お店について」の文章に、赤い線で行の区切りを引きました。線と線のあいだが、1行分の高さです。',
+          p2: 'Web では「行の高さ（line-height）」で行間を決めます。いまは、文字の大きさ {fs}px に対して、行の高さが {px}px（{v}倍）です。',
+          p3: '日本語の文章は、行の高さを文字の大きさの1.7〜2倍くらいにすると読みやすいと言われています。',
+          tip: '行の高さから文字の大きさを引いた残りが、上下の行のあいだの空きになります。',
+        },
+        touch: {
+          p1: 'つまみを動かして、見本の文章の行間を変えてみましょう。',
+          label: '行の高さ',
+          value: '{v}倍（{px}px）',
+          tight: ['詰まりすぎ', '上下の行がくっついて見え、次の行を目で追いにくくなりました。'],
+          ok: ['ちょうどいい', '行を目で追いやすく、文章がひとまとまりに見えます。'],
+          loose: ['広すぎ', '行がばらばらに見え、ひとつの文章として読みにくくなりました。'],
+        },
+        check: {
+          q: '同じ文章を、ちがう行間で3つ並べました。いちばん読みやすいのはどれですか？',
+          sample: '豆は毎週月曜日に、お店で焼いています。朝は通勤前の一杯を、昼過ぎは本を読みながらのんびりと。',
+          correct: 'C の行間（1.8倍）が、いちばん読みやすい広さです。',
+          wrongA: 'A は行間が詰まりすぎていて、上下の行がくっついて見えます。',
+          wrongB: 'B は行間が広すぎて、行がばらばらに見えます。',
+        },
+        rule: '1行の高さ {px}px',
+      },
     },
     site: {
       url: 'hidamari-coffee.example',
       name: 'ひだまり珈琲店',
       nav: { menu: 'メニュー', about: 'お店について', access: 'アクセス', news: 'お知らせ' },
-      fv: {
+      hero: {
         title: '朝の光と、深煎りの一杯。',
         body: '駅から歩いて3分の、小さな喫茶店です。毎朝7時に開きます。',
         button: 'メニューを見る',
@@ -483,6 +665,10 @@ const TEXT = {
           { name: '季節のケーキ', price: '520円', desc: '月替わりです。いまは、りんごのタルトをお出ししています。' },
         ],
       },
+      about: {
+        title: 'お店について',
+        body: 'ひだまり珈琲店は、商店街の角にある、席が12だけの小さな喫茶店です。豆は毎週月曜日に、お店で焼いています。朝は通勤前の一杯を、昼過ぎは本を読みながらのんびりと。時間によって、ちがう過ごし方ができるお店です。',
+      },
       info: {
         title: '営業時間・アクセス',
         rows: [
@@ -490,6 +676,13 @@ const TEXT = {
           ['定休日', '水曜日'],
           ['住所', 'ひだまり町1-2-3（架空の住所です）'],
           ['最寄り駅', 'ひだまり駅から歩いて3分'],
+        ],
+      },
+      news: {
+        title: 'お知らせ',
+        items: [
+          ['11月1日', '季節のケーキが、りんごのタルトに変わりました。'],
+          ['10月20日', '10月27日（日）は、店内の点検のためお休みします。'],
         ],
       },
       footer: {
@@ -500,15 +693,10 @@ const TEXT = {
   },
 };
 
-/* 学ぶ用語の並び。ready が true のものだけ学べる */
-const TERMS = [
-  { id: 'header', ready: true },
-  { id: 'nav', ready: false },
-  { id: 'fv', ready: false },
-  { id: 'space', ready: false },
-  { id: 'lineHeight', ready: false },
-];
+/* 学ぶ用語の並び */
+const TERMS = ['header', 'nav', 'fv', 'space', 'lineHeight'];
 const STEPS = ['look', 'touch', 'check'];
+const DEFAULT = { space: 1, lh: 1.8 };
 
 let lang = 'ja';
 const t = (key, vars) => {
@@ -531,29 +719,38 @@ const state = {
   term: 'header',
   step: 'look',
   hover: null,      // 見る：マウスが乗っている部分
-  pinned: null,     // 見る：パネルのボタンで示している部分
-  hidden: false,    // 触る：ヘッダーを隠しているか
-  answer: null,     // 確かめる：{ correct, el, x, y }
+  pinned: null,     // 見る：パネルのボタンで示している項目の id
+  answer: null,     // 確かめる：答えの結果
+  hidden: false,    // ヘッダー：隠しているか
+  moved: null,      // ナビゲーション：移動した先
+  vpH: null,        // ファーストビュー：見本の画面の高さ（null ならふつう）
+  vpMax: 0,
+  space: DEFAULT.space,  // 余白の倍率
+  lh: DEFAULT.lh,        // 行の高さ
   progress: loadProgress(),
 };
 
 /* ---- 小さな道具 ---- */
 const $ = (s, root = document) => root.querySelector(s);
 const site = $('#site');
+const vp = $('#viewport');
 const overlay = $('#overlay');
 const panel = $('#panel');
 const part = (name) => site.querySelector(`[data-part="${name}"]`);
+const T = (k, v) => t(`terms.${state.term}.${k}`, v);
 function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k === 'on') for (const [ev, fn] of Object.entries(v)) el.addEventListener(ev, fn);
     else if (k === 'class') el.className = v;
+    else if (k === 'style') el.style.cssText = v;
     else if (v === true) el.setAttribute(k, '');
     else if (v !== false && v != null) el.setAttribute(k, v);
   }
-  for (const c of children.flat()) if (c != null) el.append(c);
+  for (const c of children.flat()) if (c != null && c !== false) el.append(c);
   return el;
 }
+const round1 = (n) => Math.round(n * 10) / 10;
 
 /* ---- 文章を流し込む ---- */
 function applyText() {
@@ -564,166 +761,54 @@ function applyText() {
     h('dd', {}, m.desc),
   ]));
   $('#s-info').replaceChildren(...t('site.info.rows').flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
+  $('#s-news').replaceChildren(...t('site.news.items').map(([d, s]) => h('li', {}, h('time', {}, d), h('span', {}, s))));
 }
 
-/* ---- 上の帯：5語 ---- */
-function renderTerms() {
-  $('#terms').replaceChildren(...TERMS.map((term, i) => {
-    const done = state.progress[term.id];
-    return h('li', {},
-      h('button', {
-        type: 'button',
-        disabled: !term.ready,
-        'aria-current': term.id === state.term ? 'step' : false,
-        on: { click: () => { state.term = term.id; setStep('look'); } },
-      },
-        h('span', { class: 'num' }, String(i + 1).padStart(2, '0')),
-        t(`terms.${term.id}.name`),
-        !term.ready ? h('span', { class: 'soon' }, t('app.soon')) : null,
-        done ? h('span', { class: 'stamp', title: t('app.doneLabel'), 'aria-label': t('app.doneLabel') }, t('app.done')) : null,
-      ));
-  }));
-}
-
-/* ---- 右の説明パネル ---- */
-function renderPanel() {
-  const T = (k, v) => t(`terms.${state.term}.${k}`, v);
-  const idx = TERMS.findIndex((x) => x.id === state.term);
-
-  const tabs = h('div', { class: 'tabs', role: 'tablist' }, STEPS.map((s, i) => h('button', {
-    type: 'button',
-    role: 'tab',
-    'aria-selected': String(s === state.step),
-    on: { click: () => setStep(s) },
-  }, h('span', { class: 'num' }, i + 1), t(`app.steps.${s}`))));
-
-  const nextStep = STEPS[STEPS.indexOf(state.step) + 1];
-  const nextBtn = nextStep
-    ? h('button', { type: 'button', class: 'btn', on: { click: () => setStep(nextStep) } }, t('app.next', { step: t(`app.steps.${nextStep}`) }))
-    : null;
-
-  let body;
-  if (state.step === 'look') {
-    body = h('div', { class: 'step', role: 'tabpanel' },
-      h('p', {}, T('look.p1')),
-      h('p', {}, T('look.p2')),
-      h('ul', { class: 'parts' }, T('look.items').map((it) => h('li', {},
-        h('button', {
-          type: 'button',
-          'aria-pressed': String(state.pinned === it.part),
-          on: { click: () => pin(it.part) },
-        }, h('b', {}, t(`parts.${it.part}`)), h('span', {}, it.desc))))),
-      h('p', {}, T('look.p3')),
-      h('p', { class: 'sub' }, T('look.tip')),
-      h('div', { class: 'actions' }, nextBtn));
-  } else if (state.step === 'touch') {
-    body = h('div', { class: 'step', role: 'tabpanel' },
-      h('p', {}, T('touch.p1')),
-      h('label', { class: 'switch' },
-        h('input', {
-          type: 'checkbox',
-          role: 'switch',
-          checked: state.hidden,
-          on: { change: (e) => { state.hidden = e.target.checked; applyHidden(); renderPanel(); } },
-        }),
-        T('touch.switch')),
-      state.hidden ? h('p', {}, T('touch.after')) : null,
-      h('div', { class: 'actions' }, nextBtn));
-  } else {
-    const a = state.answer;
-    let feedback = null;
-    if (a && a.correct) {
-      const sub = a.name !== 'header';
-      feedback = [
-        h('p', {}, h('span', { class: 'label ok' }, t('app.ok')), sub ? T('check.correctSub', { name: t(`parts.${a.name}`) }) : T('check.correct')),
-        h('p', { class: 'sub' }, T('check.done')),
-      ];
-    } else if (a) {
-      feedback = h('p', {}, h('span', { class: 'label ng' }, t('app.ng')), T('check.wrong', { name: t(`parts.${a.name}`) }));
-    }
-    body = h('div', { class: 'step', role: 'tabpanel' },
-      h('p', {}, T('check.q')),
-      h('p', { class: 'sub' }, T('check.keys')),
-      h('div', { class: 'feedback' }, feedback),
-      a ? h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn quiet', on: { click: () => { state.answer = null; renderPanel(); draw(); } } }, t('app.retry'))) : null);
-  }
-
-  panel.replaceChildren(
-    h('p', { class: 'count' }, t('app.count', { n: idx + 1, total: TERMS.length })),
-    h('h1', { class: 'term-name' }, T('name')),
-    h('p', { class: 'term-en', lang: 'en' }, T('en')),
-    h('p', { class: 'lead' }, T('lead')),
-    tabs,
-    body,
-  );
-}
-
-/* ---- 段階の切り替え ---- */
-function setStep(step) {
-  state.step = step;
-  state.hover = null;
-  state.pinned = null;
-  state.answer = null;
-  if (step !== 'touch') state.hidden = false;
-  applyHidden();
-  const quiz = step === 'check';
+/* ============================================================
+   見本のサイトの状態を、いまの学習に合わせる
+   ============================================================ */
+function applySite() {
+  part('header').hidden = state.hidden;
+  site.style.setProperty('--sp', state.space);
+  site.style.setProperty('--lh', state.lh);
+  part('info').classList.toggle('cramped', state.term === 'space' && state.step === 'check');
+  if (state.vpH) { vp.style.flex = '0 0 auto'; vp.style.height = `${state.vpH}px`; }
+  else { vp.style.flex = ''; vp.style.height = ''; }
+  const quiz = state.step === 'check' && LESSONS[state.term].check.inSample;
   site.classList.toggle('quiz', quiz);
   site.querySelectorAll('[data-part]').forEach((el) => {
     if (quiz) el.tabIndex = 0;
     else el.removeAttribute('tabindex');
   });
-  renderTerms();
-  renderPanel();
-  draw();
 }
 
-function applyHidden() {
-  part('header').hidden = state.hidden;
-  draw();
-}
-
-function pin(name) {
-  state.pinned = state.pinned === name ? null : name;
-  if (state.pinned) {
-    // ページ全体は動かさず、見本の枠の中だけをスクロールする
-    const vp = $('#viewport');
-    const b = boxOf(part(name));
-    if (b.y < vp.scrollTop || b.y + b.h > vp.scrollTop + vp.clientHeight) {
-      vp.scrollTo({ top: Math.max(0, b.y - 24), behavior: 'smooth' });
-    }
-  }
-  renderPanel();
-  draw();
-}
-
-/* ---- 確かめる：答え合わせ ---- */
-function answer(target, x, y) {
-  const el = target.closest('[data-part]');
-  if (!el) return;
-  const correct = !!el.closest('[data-part="header"]');
-  state.answer = { correct, el, name: el.dataset.part, x, y };
-  if (correct && !state.progress.header) {
-    state.progress.header = true;
-    saveProgress();
-    renderTerms();
-  }
-  renderPanel();
-  draw();
+function scrollStage(target) {
+  if (!target) { vp.scrollTop = 0; return; }
+  vp.scrollTop = Math.max(0, boxOf(part(target)).y - 12);
 }
 
 /* ============================================================
    赤ペンの書き込み（SVG）
    ============================================================ */
 const NS = 'http://www.w3.org/2000/svg';
-const svg = (tag, attrs) => {
+const svg = (tag, attrs = {}, text) => {
   const el = document.createElementNS(NS, tag);
   for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  if (text != null) el.textContent = text;
   return el;
 };
+const PEN = 'var(--stage-pen)';
 function boxOf(el) {
   const r = el.getBoundingClientRect();
   const s = site.getBoundingClientRect();
   return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+}
+function defs() {
+  const pattern = svg('pattern', { id: 'hatch', width: 7, height: 7, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
+  pattern.append(svg('line', { x1: 0, y1: 0, x2: 0, y2: 7, stroke: PEN, 'stroke-width': 1.5, opacity: 0.5 }));
+  const d = svg('defs');
+  d.append(pattern);
+  return d;
 }
 
 /* 囲み＋引き出し線＋名前 */
@@ -734,7 +819,7 @@ function annotate(el, label, { dashed = false } = {}) {
   const H = site.offsetHeight;
   const out = [svg('rect', {
     x: b.x + 3, y: b.y + 3, width: Math.max(0, b.w - 6), height: Math.max(0, b.h - 6),
-    fill: 'none', stroke: 'var(--stage-pen)', 'stroke-width': dashed ? 1.5 : 2.5,
+    fill: 'none', stroke: PEN, 'stroke-width': dashed ? 1.5 : 2.5,
     'stroke-dasharray': dashed ? '6 4' : 'none', rx: 2,
   })];
   // 実線（主役）の名前は左、点線（補足）の名前は右に書いて、重ならないようにする
@@ -742,42 +827,40 @@ function annotate(el, label, { dashed = false } = {}) {
   const right = dashed || b.x + 18 + textW + 12 > W;
   const lx = right ? b.x + b.w - 18 : b.x + 18;
   // 名前は、いま見えている範囲に収まる側に書く（下 → 上 → 枠の内側の順に試す）
-  const vp = $('#viewport');
   const seenTop = vp.scrollTop;
   const seenBottom = Math.min(H, vp.scrollTop + vp.clientHeight);
-  const len = dashed ? 30 : 18;   // 補足の名前は少し長い線で離して書く
+  if (b.y + b.h < seenTop || b.y > seenBottom) return out;  // 見えていない場所には名前を書かない
+  const len = dashed ? 30 : 18;
   let where = 'inside';
   if (b.y + b.h + len + 16 < seenBottom && b.y + b.h > seenTop) where = 'below';
   else if (b.y - len - 16 > seenTop && b.y < seenBottom) where = 'above';
   const tx = right ? lx - 6 : lx + 6;
+  const anchor = right ? 'end' : 'start';
   if (where === 'inside') {
-    const y = Math.max(b.y, seenTop) + 12;
-    const text = svg('text', { x: tx, y, 'text-anchor': right ? 'end' : 'start', 'dominant-baseline': 'hanging' });
-    text.textContent = label;
-    out.push(text);
+    out.push(svg('text', { x: tx, y: Math.max(b.y, seenTop) + 12, 'text-anchor': anchor, 'dominant-baseline': 'hanging' }, label));
     return out;
   }
   const below = where === 'below';
   const y0 = below ? b.y + b.h - 3 : b.y + 3;
   const y1 = below ? y0 + len : y0 - len;
-  const ty = below ? y1 + 5 : y1 + 1;
   out.push(
-    svg('circle', { cx: lx, cy: y0, r: 3, fill: 'var(--stage-pen)' }),
-    svg('path', { d: `M${lx} ${y0} L${lx} ${y1}`, fill: 'none', stroke: 'var(--stage-pen)', 'stroke-width': 1.5 }),
+    svg('circle', { cx: lx, cy: y0, r: 3, fill: PEN }),
+    svg('path', { d: `M${lx} ${y0} L${lx} ${y1}`, fill: 'none', stroke: PEN, 'stroke-width': 1.5 }),
+    svg('text', { x: tx, y: below ? y1 + 5 : y1 + 1, 'text-anchor': anchor, 'dominant-baseline': below ? 'hanging' : 'auto' }, label),
   );
-  const text = svg('text', { x: tx, y: ty, 'text-anchor': right ? 'end' : 'start', 'dominant-baseline': below ? 'hanging' : 'auto' });
-  text.textContent = label;
-  out.push(text);
   return out;
 }
 
-/* 正解の赤丸 */
+/* 正解の赤丸（要素を囲む） */
 function circle(el, label) {
   const b = boxOf(el);
-  const cx = b.x + b.w / 2;
-  const cy = b.y + b.h / 2;
-  const rx = b.w / 2 - 14;
-  const ry = b.h / 2 - 4;
+  return loop(b.x + b.w / 2, b.y + b.h / 2, b.w / 2 - 14, b.h / 2 - 4, label, b.x + 18, b.y + b.h + 8);
+}
+/* 正解の赤丸（点を囲む） */
+function ring(x, y, label) {
+  return loop(x, y, 26, 18, label, x + 30, y - 22);
+}
+function loop(cx, cy, rx, ry, label, lx, ly) {
   // 手で描いたように、少しゆがませて1周より少し多く回す
   const start = Math.PI * 1.1;
   const pts = [];
@@ -786,10 +869,10 @@ function circle(el, label) {
     const k = 1 + 0.02 * Math.sin(a * 3) - 0.08 * (i / 80);
     pts.push(`${(cx + rx * k * Math.cos(a)).toFixed(1)} ${(cy + ry * k * Math.sin(a)).toFixed(1)}`);
   }
-  const d = `M${pts.join(' L')}`;
-  const text = svg('text', { x: b.x + 18, y: b.y + b.h + 8, 'dominant-baseline': 'hanging' });
-  text.textContent = label;
-  return [svg('path', { d, fill: 'none', stroke: 'var(--stage-pen)', 'stroke-width': 2.5, 'stroke-linecap': 'round' }), text];
+  return [
+    svg('path', { d: `M${pts.join(' L')}`, fill: 'none', stroke: PEN, 'stroke-width': 2.5, 'stroke-linecap': 'round' }),
+    svg('text', { x: lx, y: ly, 'dominant-baseline': 'hanging' }, label),
+  ];
 }
 
 /* ちがう場所につける × */
@@ -797,33 +880,438 @@ function cross(x, y) {
   const s = 8;
   return [svg('path', {
     d: `M${x - s} ${y - s} L${x + s} ${y + s} M${x + s} ${y - s} L${x - s} ${y + s}`,
-    stroke: 'var(--stage-pen)', 'stroke-width': 2.5, 'stroke-linecap': 'round',
+    stroke: PEN, 'stroke-width': 2.5, 'stroke-linecap': 'round',
   })];
 }
 
+/* ファーストビューの境目（折り目）。下側は薄く塗る */
+function fold(label) {
+  const y = foldY();
+  const W = site.offsetWidth;
+  const H = site.offsetHeight;
+  // 名前は、見本の文字と重なっても読めるよう、赤い札にして書く
+  const tagW = label.length * 13 + 16;
+  return [
+    svg('rect', { x: 0, y, width: W, height: Math.max(0, H - y), fill: PEN, opacity: 0.05 }),
+    svg('path', { d: `M0 ${y} L${W} ${y}`, stroke: PEN, 'stroke-width': 2.5 }),
+    svg('rect', { x: W - 12 - tagW, y: y - 22, width: tagW, height: 22, fill: PEN, rx: 2 }),
+    svg('text', { x: W - 12 - tagW / 2, y: y - 11, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'tag' }, label),
+  ];
+}
+const foldY = () => vp.clientHeight;
+
+/* 余白に斜線と大きさを書く */
+function hatch(x, y, w, hgt, strong = true) {
+  const n = Math.max(0, Math.round(hgt));
+  const out = [svg('rect', { x, y, width: Math.max(0, w), height: Math.max(0, hgt), fill: 'url(#hatch)', opacity: strong ? 1 : 0.35 })];
+  if (strong) out.push(svg('text', { x: x + w - 10, y: y + hgt / 2, 'text-anchor': 'end', 'dominant-baseline': 'middle' }, `${n}px`));
+  return out;
+}
+function gaps() {
+  const menu = part('menu');
+  const h2 = $('h2', menu);
+  const dl = $('.s-menu', menu);
+  const dd = $('dd', dl);
+  const dt2 = dl.querySelectorAll('dt')[1];
+  const m = boxOf(menu), hb = boxOf(h2), db = boxOf(dl), ddb = boxOf(dd), d2 = boxOf(dt2);
+  const top = parseFloat(getComputedStyle(menu).paddingTop);
+  return {
+    section: [m.x, m.y + 1, m.w, top],   // 上の 1px は区切りの線
+    heading: [db.x, hb.y + hb.h, db.w, db.y - (hb.y + hb.h)],
+    item: [db.x, ddb.y + ddb.h, db.w, d2.y - (ddb.y + ddb.h)],
+  };
+}
+
+/* 行の区切り線 */
+function rules() {
+  const p = $('#s-about-text');
+  const b = boxOf(p);
+  const fs = parseFloat(getComputedStyle(p).fontSize);
+  const lh = fs * state.lh;
+  const n = Math.max(1, Math.round(b.h / lh));
+  const out = [];
+  for (let i = 0; i <= n; i++) {
+    const y = b.y + i * lh;
+    out.push(svg('path', { d: `M${b.x - 8} ${y} L${b.x + b.w} ${y}`, stroke: PEN, 'stroke-width': i === 0 || i === 1 ? 1.5 : 1, opacity: i <= 1 ? 1 : 0.6 }));
+  }
+  out.push(svg('text', { x: b.x, y: b.y - 8 }, t('terms.lineHeight.rule', { px: Math.round(lh) })));
+  return out;
+}
+
+/* ============================================================
+   用語ごとの中身
+   ============================================================ */
+const LESSONS = {
+  header: {
+    hoverNames: true,
+    main: () => part('header'),
+    items: { logo: () => part('logo'), nav: () => part('nav') },
+    lookMarks: () => annotate(part('header'), t('parts.header')),
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        h('label', { class: 'switch' },
+          h('input', {
+            type: 'checkbox', role: 'switch', checked: state.hidden,
+            on: { change: (e) => { state.hidden = e.target.checked; applySite(); renderPanel(); draw(); } },
+          }),
+          T('touch.switch')),
+        state.hidden ? h('p', {}, T('touch.after')) : null,
+      ];
+    },
+    check: {
+      inSample: true,
+      judge(el) {
+        const name = el.dataset.part;
+        if (el.closest('[data-part="header"]')) return { correct: true, msg: name === 'header' ? 'correct' : 'correctSub', name };
+        return { correct: false, msg: 'wrong', name };
+      },
+      marks: (a) => (a.correct ? circle(part('header'), t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+    },
+  },
+
+  nav: {
+    hoverNames: true,
+    main: () => part('nav'),
+    items: Object.fromEntries(['menu', 'about', 'info', 'news'].map((id) => [id, () => site.querySelector(`[data-go="${id}"]`)])),
+    lookMarks: () => annotate(part('nav'), t('parts.nav')),
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        state.moved ? h('p', {}, T('touch.moved', { name: t(`parts.${state.moved}`) })) : null,
+        state.moved ? h('p', { class: 'sub' }, T('touch.back')) : null,
+        state.moved ? h('div', { class: 'actions' }, h('button', {
+          type: 'button', class: 'btn quiet',
+          on: { click: () => { vp.scrollTo({ top: 0, behavior: 'smooth' }); } },
+        }, T('touch.top'))) : null,
+      ];
+    },
+    touchMarks: () => annotate(part('nav'), t('parts.nav')),
+    check: {
+      inSample: true,
+      judge(el) {
+        const name = el.dataset.part;
+        if (el.closest('[data-part="nav"]')) return { correct: true, msg: 'correct', name };
+        if (el.closest('[data-part="header"]')) return { correct: false, msg: 'near', name };
+        return { correct: false, msg: 'wrong', name };
+      },
+      marks: (a) => (a.correct ? circle(part('nav'), t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+    },
+  },
+
+  fv: {
+    hoverNames: true,
+    items: { logo: () => part('logo'), nav: () => part('nav'), hero: () => part('hero') },
+    lookMarks: () => fold(T('fold')),
+    touch() {
+      const out = h('div', { class: 'verdict', id: 'fv-out' });
+      const update = () => {
+        const targets = {
+          logo: part('logo'), nav: part('nav'),
+          title: $('.s-hero h1'), button: $('.s-hero .s-btn'), art: $('.s-hero svg'),
+        };
+        const inside = [], outside = [];
+        for (const [k, el] of Object.entries(targets)) {
+          const b = boxOf(el);
+          (b.y + b.h <= foldY() + 1 ? inside : outside).push(T(`touch.targets.${k}`));
+        }
+        const sep = '、';
+        out.replaceChildren(
+          h('p', {}, T('touch.inside', { list: inside.join(sep) || T('touch.none') })),
+          h('p', {}, T('touch.outside', { list: outside.join(sep) || T('touch.none') })),
+          outside.includes(T('touch.targets.button')) ? h('p', { class: 'sub' }, T('touch.warn')) : null,
+        );
+      };
+      requestAnimationFrame(update);
+      return [
+        h('p', {}, T('touch.p1')),
+        rangeRow({
+          label: T('touch.label'), min: 160, max: state.vpMax, step: 10, value: state.vpH || state.vpMax,
+          format: (v) => T('touch.value', { n: v }),
+          onInput: (v) => { state.vpH = v; vp.scrollTop = 0; applySite(); draw(); update(); },
+        }),
+        out,
+      ];
+    },
+    touchMarks: () => fold(T('fold')),
+    check: {
+      inSample: true,
+      judge(el, x, y) {
+        return { correct: y > foldY(), msg: y > foldY() ? 'correct' : 'wrong', name: el.dataset.part };
+      },
+      marks: (a) => [...fold(T('check.fold')), ...(a.correct ? ring(a.x, a.y, t('app.ok')) : cross(a.x, a.y))],
+    },
+  },
+
+  space: {
+    focus: 'menu',
+    lookMarks(pinned) {
+      const g = gaps();
+      return Object.entries(g).flatMap(([id, r]) => (!pinned || pinned === id ? hatch(...r) : []));
+    },
+    touch() {
+      const verdict = h('div', { class: 'verdict' });
+      const update = (v) => {
+        const key = v < 0.6 ? 'tight' : v > 1.5 ? 'loose' : 'ok';
+        const [title, body] = T(`touch.${key}`);
+        verdict.replaceChildren(h('p', {}, h('b', {}, title), body));
+      };
+      update(state.space);
+      const row = rangeRow({
+        label: T('touch.label'), min: 0, max: 200, step: 10, value: Math.round(state.space * 100),
+        format: (v) => T('touch.value', { n: v }),
+        onInput: (v) => { state.space = v / 100; applySite(); draw(); update(state.space); },
+      });
+      const set = (v) => { const input = $('input', row); input.value = v; input.dispatchEvent(new Event('input')); };
+      return [
+        h('p', {}, T('touch.p1')),
+        row,
+        verdict,
+        h('div', { class: 'actions' },
+          h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(0) } }, T('touch.zero')),
+          h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(100) } }, t('app.reset'))),
+      ];
+    },
+    touchMarks() { return Object.values(gaps()).flatMap((r) => hatch(...r)); },
+    check: {
+      inSample: true,
+      judge(el) {
+        const ok = !!el.closest('[data-part="info"]');
+        return { correct: ok, msg: ok ? 'correct' : 'wrong', name: el.dataset.part };
+      },
+      marks: (a) => (a.correct ? circle(part('info'), t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+    },
+  },
+
+  lineHeight: {
+    focus: 'about',
+    lookVars: () => ({ fs: 15, px: Math.round(15 * state.lh), v: state.lh }),
+    lookMarks: () => rules(),
+    touch() {
+      const verdict = h('div', { class: 'verdict' });
+      const update = (v) => {
+        const key = v < 1.4 ? 'tight' : v > 2.3 ? 'loose' : 'ok';
+        const [title, body] = T(`touch.${key}`);
+        verdict.replaceChildren(h('p', {}, h('b', {}, title), body));
+      };
+      update(state.lh);
+      const row = rangeRow({
+        label: T('touch.label'), min: 1, max: 3, step: 0.1, value: state.lh,
+        format: (v) => T('touch.value', { v: round1(v).toFixed(1), px: Math.round(15 * v) }),
+        onInput: (v) => { state.lh = round1(v); applySite(); draw(); update(state.lh); },
+      });
+      const set = (v) => { const input = $('input', row); input.value = v; input.dispatchEvent(new Event('input')); };
+      return [
+        h('p', {}, T('touch.p1')),
+        row,
+        verdict,
+        h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(DEFAULT.lh) } }, t('app.reset'))),
+      ];
+    },
+    touchMarks: () => rules(),
+    check: {
+      inSample: false,
+      choices: [1.1, 3.0, 1.8],
+      answers: ['wrongA', 'wrongB', 'correct'],
+    },
+  },
+};
+
+/* つまみ（ラベル・いまの値・スライダー） */
+function rangeRow({ label, min, max, step, value, format, onInput }) {
+  const id = `range-${Math.random().toString(36).slice(2, 7)}`;
+  const output = h('output', { for: id }, format(Number(value)));
+  const input = h('input', {
+    id, type: 'range', min, max, step, value,
+    on: { input: (e) => { const v = Number(e.target.value); output.textContent = format(v); onInput(v); } },
+  });
+  return h('div', { class: 'range' }, h('label', { for: id }, label, output), input);
+}
+
+/* ============================================================
+   画面を組み立てる
+   ============================================================ */
+function renderTerms() {
+  $('#terms').replaceChildren(...TERMS.map((id, i) => h('li', {},
+    h('button', {
+      type: 'button',
+      'aria-current': id === state.term ? 'step' : false,
+      on: { click: () => selectTerm(id) },
+    },
+      h('span', { class: 'num' }, String(i + 1).padStart(2, '0')),
+      t(`terms.${id}.name`),
+      state.progress[id] ? h('span', { class: 'stamp', title: t('app.doneLabel'), 'aria-label': t('app.doneLabel') }, t('app.done')) : null))));
+}
+
+function renderPanel() {
+  const L = LESSONS[state.term];
+  const idx = TERMS.indexOf(state.term);
+
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }, STEPS.map((s, i) => h('button', {
+    type: 'button', role: 'tab',
+    'aria-selected': String(s === state.step),
+    on: { click: () => setStep(s) },
+  }, h('span', { class: 'num' }, i + 1), t(`app.steps.${s}`))));
+
+  const nextStep = STEPS[STEPS.indexOf(state.step) + 1];
+  const nextBtn = nextStep
+    ? h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn', on: { click: () => setStep(nextStep) } }, t('app.next', { step: t(`app.steps.${nextStep}`) })))
+    : null;
+
+  let body;
+  if (state.step === 'look') {
+    const vars = L.lookVars ? L.lookVars() : undefined;
+    const items = T('look.items');
+    body = [
+      h('p', {}, T('look.p1', vars)),
+      h('p', {}, T('look.p2', vars)),
+      Array.isArray(items) ? h('ul', { class: 'parts' }, items.map((it) => h('li', {},
+        h('button', {
+          type: 'button',
+          'aria-pressed': String(state.pinned === it.id),
+          on: { click: () => pin(it.id) },
+        }, h('b', {}, it.label), h('span', {}, it.desc))))) : null,
+      h('p', {}, T('look.p3', vars)),
+      h('p', { class: 'sub' }, T('look.tip', vars)),
+      nextBtn,
+    ];
+  } else if (state.step === 'touch') {
+    body = [...L.touch(), nextBtn];
+  } else {
+    body = renderCheck(L);
+  }
+
+  panel.replaceChildren(
+    h('p', { class: 'count' }, t('app.count', { n: idx + 1, total: TERMS.length })),
+    h('h1', { class: 'term-name' }, T('name')),
+    h('p', { class: 'term-en', lang: 'en' }, T('en')),
+    h('p', { class: 'lead' }, T('lead')),
+    tabs,
+    h('div', { class: 'step', role: 'tabpanel' }, body),
+  );
+}
+
+function renderCheck(L) {
+  const a = state.answer;
+  const out = [h('p', {}, T('check.q'))];
+  if (L.check.inSample) out.push(h('p', { class: 'sub' }, t('app.keys')));
+  if (L.check.choices) {
+    out.push(h('div', { class: 'choices' }, L.check.choices.map((lh, i) => h('button', {
+      type: 'button',
+      'aria-pressed': String(!!a && a.choice === i),
+      on: { click: () => choose(i) },
+    }, h('span', { class: 'key' }, 'ABC'[i]), h('span', { class: 'sample', style: `line-height:${lh}` }, T('check.sample'))))));
+  }
+  if (a) {
+    out.push(h('div', { class: 'feedback' },
+      h('p', {},
+        h('span', { class: `label ${a.correct ? 'ok' : 'ng'}` }, t(a.correct ? 'app.ok' : 'app.ng')),
+        T(`check.${a.msg}`, { name: a.name ? t(`parts.${a.name}`) : '' }))));
+    const next = TERMS[TERMS.indexOf(state.term) + 1];
+    const actions = h('div', { class: 'actions' });
+    if (a.correct && next) actions.append(h('button', { type: 'button', class: 'btn', on: { click: () => selectTerm(next) } }, t('app.nextTerm', { name: t(`terms.${next}.name`) })));
+    if (a.correct && !next && TERMS.every((id) => state.progress[id])) out.push(h('p', { class: 'sub' }, t('app.allDone')));
+    actions.append(h('button', { type: 'button', class: 'btn quiet', on: { click: () => { state.answer = null; renderPanel(); draw(); } } }, t('app.retry')));
+    out.push(actions);
+  }
+  return out;
+}
+
+/* ---- 切り替え ---- */
+function resetTouch() {
+  state.hidden = false;
+  state.moved = null;
+  state.vpH = null;
+  state.space = DEFAULT.space;
+  state.lh = DEFAULT.lh;
+}
+
+function selectTerm(id) {
+  state.term = id;
+  panel.scrollTop = 0;
+  if (matchMedia('(max-width: 900px)').matches) window.scrollTo({ top: 0 });
+  setStep('look');
+}
+
+function setStep(step) {
+  state.step = step;
+  state.hover = null;
+  state.pinned = null;
+  state.answer = null;
+  resetTouch();
+  applySite();
+  if (step === 'touch' && state.term === 'fv') state.vpMax = vp.clientHeight;
+  const L = LESSONS[state.term];
+  scrollStage(step === 'check' && state.term !== 'lineHeight' ? null : L.focus);
+  renderTerms();
+  renderPanel();
+  draw();
+}
+
+function pin(id) {
+  state.pinned = state.pinned === id ? null : id;
+  const L = LESSONS[state.term];
+  const el = state.pinned && L.items && L.items[id] ? L.items[id]() : null;
+  if (el) {
+    // ページ全体は動かさず、見本の枠の中だけをスクロールする
+    const b = boxOf(el);
+    if (b.y < vp.scrollTop || b.y + b.h > vp.scrollTop + vp.clientHeight) {
+      vp.scrollTo({ top: Math.max(0, b.y - 24), behavior: 'smooth' });
+    }
+  }
+  renderPanel();
+  draw();
+}
+
+/* ---- 確かめる：答え合わせ ---- */
+function record(correct) {
+  if (correct && !state.progress[state.term]) {
+    state.progress[state.term] = true;
+    saveProgress();
+    renderTerms();
+  }
+}
+function answer(target, x, y) {
+  const el = target.closest('[data-part]');
+  if (!el) return;
+  const r = LESSONS[state.term].check.judge(el, x, y);
+  state.answer = { ...r, el, x, y };
+  record(r.correct);
+  renderPanel();
+  draw();
+}
+function choose(i) {
+  const c = LESSONS.lineHeight.check;
+  state.answer = { choice: i, correct: c.answers[i] === 'correct', msg: c.answers[i] };
+  record(state.answer.correct);
+  renderPanel();
+}
+
+/* ---- 書き込みを描き直す ---- */
 function draw() {
   overlay.setAttribute('width', site.offsetWidth);
   overlay.setAttribute('height', site.offsetHeight);
-  const marks = [];
+  const L = LESSONS[state.term];
+  const marks = [defs()];
   const name = (el) => t(`parts.${el.dataset.part}`);
 
   if (state.step === 'look') {
-    const header = part('header');
-    marks.push(...annotate(header, name(header)));
-    const extra = state.pinned ? part(state.pinned) : state.hover;
-    if (extra && extra !== header) marks.push(...annotate(extra, name(extra), { dashed: true }));
+    marks.push(...L.lookMarks(state.pinned));
+    if (state.pinned && L.items && L.items[state.pinned]) {
+      const it = T('look.items').find((x) => x.id === state.pinned);
+      marks.push(...annotate(L.items[state.pinned](), it.label, { dashed: true }));
+    } else if (L.hoverNames && state.hover && state.hover !== (L.main && L.main())) {
+      marks.push(...annotate(state.hover, name(state.hover), { dashed: true }));
+    }
   }
-  if (state.step === 'check' && state.answer) {
-    const a = state.answer;
-    if (a.correct) marks.push(...circle(part('header'), t('app.ok')));
-    else marks.push(...annotate(a.el, name(a.el), { dashed: true }), ...cross(a.x, a.y));
-  }
+  if (state.step === 'touch' && L.touchMarks) marks.push(...L.touchMarks());
+  if (state.step === 'check' && state.answer && L.check.marks) marks.push(...L.check.marks(state.answer));
   overlay.replaceChildren(...marks);
 }
 
 /* ---- 見本のサイトでの操作 ---- */
 site.addEventListener('pointermove', (e) => {
-  if (state.step !== 'look' || state.pinned) return;
+  if (state.step !== 'look' || state.pinned || !LESSONS[state.term].hoverNames) return;
   const el = e.target.closest('[data-part]');
   if (el !== state.hover) { state.hover = el; draw(); }
 });
@@ -833,12 +1321,21 @@ site.addEventListener('pointerleave', () => {
   draw();
 });
 site.addEventListener('click', (e) => {
-  if (e.target.closest('a')) e.preventDefault();  // 見本のリンクではページを移動しない
-  if (state.step === 'look') {
+  const link = e.target.closest('a');
+  if (link) e.preventDefault();  // 見本のリンクでは、ふつうはページを移動しない
+
+  // ナビゲーションの「触る」だけは、本当に移動する
+  if (state.term === 'nav' && state.step === 'touch' && link && link.dataset.go) {
+    state.moved = link.dataset.go;
+    vp.scrollTo({ top: Math.max(0, boxOf(part(link.dataset.go)).y), behavior: 'smooth' });
+    renderPanel();
+    return;
+  }
+  if (state.step === 'look' && LESSONS[state.term].hoverNames) {
     if (state.pinned) { state.pinned = null; renderPanel(); }
     state.hover = e.target.closest('[data-part]');
     draw();
-  } else if (state.step === 'check') {
+  } else if (state.step === 'check' && LESSONS[state.term].check.inSample) {
     const s = site.getBoundingClientRect();
     answer(e.target, e.clientX - s.left, e.clientY - s.top);
   }
@@ -856,7 +1353,7 @@ site.addEventListener('keydown', (e) => {
 new ResizeObserver(() => draw()).observe(site);
 // 見本をスクロールしたら、名前を見える位置に書き直す
 let drawQueued = false;
-$('#viewport').addEventListener('scroll', () => {
+vp.addEventListener('scroll', () => {
   if (drawQueued) return;
   drawQueued = true;
   requestAnimationFrame(() => { drawQueued = false; draw(); });
