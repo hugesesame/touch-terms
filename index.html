@@ -1619,8 +1619,8 @@ const TEXT = {
         down: '見本を下へスクロールする',
         up: 'いちばん上へ戻る',
         touch: {
-          p1: '現れ方と速さを変えて、見本をスクロールしてみましょう。',
-          kinds: { up: '下から', side: '横から', none: '動かさない' },
+          p1: '現れ方と速さを変えると、見本がいちばん上からもう一度スクロールして、動きを見せます。',
+          kinds: { up: '下から', side: '左から', none: '動かさない' },
           label: '速さ',
           value: '{v}秒',
           none: '動きがないと、落ち着いて読めます。動きは、見てほしいところにだけ使うのがコツです。',
@@ -3063,18 +3063,19 @@ const LESSONS = {
       update();
       const kind = (k) => h('button', {
         type: 'button', class: 'btn quiet', 'aria-pressed': String(state.anim === k),
-        on: { click: () => { state.anim = k; applySite(); renderPanel(); } },
+        on: { click: () => { state.anim = k; applySite(); renderPanel(); replayScroll(); } },
       }, T(`touch.kinds.${k}`));
       return [
         h('p', {}, T('touch.p1')),
         h('div', { class: 'actions' }, ['up', 'side', 'none'].map(kind)),
+        scrollButtons(),
         state.anim === 'none' ? null : h('div', { style: 'margin-top:16px' }, rangeRow({
           label: T('touch.label'), min: 0.2, max: 2, step: 0.1, value: state.animDur,
           format: (v) => T('touch.value', { v: round1(v).toFixed(1) }),
           onInput: (v) => { state.animDur = round1(v); applySite(); update(); },
+          onChange: replayScroll,
         })),
         note,
-        scrollButtons(),
       ];
     },
     check: {
@@ -3345,6 +3346,21 @@ const LESSONS = {
 };
 
 /* 見本を下までスクロールする／上へ戻るボタン（固定ヘッダー） */
+/* スクロールアニメーション：見本をいちばん上へ戻し、少し待ってから下へスクロールして、動きを見せ直す */
+let replayTimer = 0;
+function replayScroll() {
+  clearTimeout(replayTimer);
+  vp.scrollTo({ top: 0, behavior: 'instant' });
+  // いちばん上で 12% 見えていないまとまりは、元に戻す（少しだけ見えているものも、下へ進むとまた現れる）
+  const box = vp.getBoundingClientRect();
+  site.querySelectorAll('[data-reveal]').forEach((el) => {
+    const r = el.getBoundingClientRect();
+    const seen = Math.max(0, Math.min(r.bottom, box.bottom) - Math.max(r.top, box.top));
+    if (seen < r.height * 0.12) el.classList.remove('shown');
+  });
+  // 元に戻る（見えなくなる）のを待ってから動かす
+  replayTimer = setTimeout(() => { if (state.term === 'scrollAnim') vp.scrollTo({ top: vp.scrollHeight, behavior: 'smooth' }); }, 400);
+}
 function scrollButtons() {
   return h('div', { class: 'actions' },
     quietBtn(T('down'), () => vp.scrollTo({ top: vp.scrollHeight, behavior: 'smooth' })),
@@ -3362,13 +3378,12 @@ function toggle(label, checked, set) {
 }
 
 /* つまみ（ラベル・いまの値・スライダー） */
-function rangeRow({ label, min, max, step, value, format, onInput }) {
+function rangeRow({ label, min, max, step, value, format, onInput, onChange }) {
   const id = `range-${Math.random().toString(36).slice(2, 7)}`;
   const output = h('output', { for: id }, format(Number(value)));
-  const input = h('input', {
-    id, type: 'range', min, max, step, value,
-    on: { input: (e) => { const v = Number(e.target.value); output.textContent = format(v); onInput(v); } },
-  });
+  const on = { input: (e) => { const v = Number(e.target.value); output.textContent = format(v); onInput(v); } };
+  if (onChange) on.change = (e) => onChange(Number(e.target.value));   // つまみを離したとき
+  const input = h('input', { id, type: 'range', min, max, step, value, on });
   return h('div', { class: 'range' }, h('label', { for: id }, label, output), input);
 }
 /* つまみ＋判定＋プリセットのボタン（余白・行間） */
