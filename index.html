@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Web Terms</title>
+<style>
+/* ============================================================
+   アプリ本体の見た目（赤ペンの校正紙）
+   ============================================================ */
+:root {
+  --paper: #faf8f4;
+  --paper-2: #f1ede6;
+  --ink: #24211d;
+  --ink-2: #625c53;
+  --line: #ddd6ca;
+  --pen: #c2381a;          /* 赤ペン（朱色）。アクセントはこの1色だけ */
+  --stage-pen: #c2381a;    /* 見本の上に書き込む赤ペン。見本は常に明るいので固定 */
+  --bar: 56px;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #1a1917;
+    --paper-2: #24221f;
+    --ink: #ece7de;
+    --ink-2: #a9a295;
+    --line: #3a3631;
+    --pen: #ff7a5c;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.75;
+  word-break: auto-phrase;   /* 日本語を文節で折り返す（対応ブラウザのみ） */
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
+
+/* ---- 上の帯：アプリ名と5語の進み具合 ---- */
+.bar {
+  height: var(--bar);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+.brand small { font-weight: 400; color: var(--ink-2); margin-left: 8px; font-size: 12px; }
+.terms {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  min-width: 0;
+  scrollbar-width: none;
+}
+.terms button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--bar);
+  padding: 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--ink-2);
+}
+.terms .num { font-family: var(--mono); font-size: 12px; }
+.terms button[aria-current="step"] { color: var(--ink); border-bottom-color: var(--pen); font-weight: 600; }
+.terms button:disabled { cursor: default; opacity: .55; }
+.terms .soon { font-size: 11px; }
+.stamp {
+  display: inline-grid;
+  place-items: center;
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--pen);
+  border-radius: 50%;
+  color: var(--pen);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---- 2列：左が見本（主役）、右が説明 ---- */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-rows: minmax(0, 1fr);
+  height: calc(100dvh - var(--bar));
+}
+.stage { padding: 20px; min-width: 0; min-height: 0; }
+.panel {
+  border-left: 1px solid var(--line);
+  padding: 28px 28px 40px;
+  overflow-y: auto;
+}
+
+/* 見本を入れる、ブラウザに見立てた枠 */
+.browser {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+.browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  padding: 0 12px;
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.browser-bar .dots { display: flex; gap: 5px; }
+.browser-bar .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.viewport { flex: 1; min-height: 0; overflow: auto; position: relative; }
+
+/* ---- 右の説明パネル ---- */
+.count { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin: 0; }
+.term-name { font-size: 30px; line-height: 1.3; margin: 4px 0 0; letter-spacing: .02em; }
+.term-en { color: var(--ink-2); font-size: 14px; margin: 2px 0 0; }
+.lead { margin: 14px 0 0; font-size: 16px; }
+
+.tabs {
+  display: flex;
+  margin: 24px 0 20px;
+  border-bottom: 1px solid var(--line);
+}
+.tabs button {
+  flex: 1;
+  padding: 10px 4px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  cursor: pointer;
+  color: var(--ink-2);
+}
+.tabs button .num { font-family: var(--mono); font-size: 12px; margin-right: 6px; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--pen); font-weight: 600; }
+
+.step p { margin: 0 0 14px; }
+.step .sub { color: var(--ink-2); font-size: 14px; }
+
+.parts { list-style: none; margin: 0 0 18px; padding: 0; border-top: 1px solid var(--line); }
+.parts button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 7.5em 1fr;
+  gap: 12px;
+  padding: 10px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.parts b { font-weight: 600; }
+.parts span { color: var(--ink-2); font-size: 14px; }
+.parts button[aria-pressed="true"] b { color: var(--pen); }
+@media (hover: hover) { .parts button:hover { background: var(--paper-2); } }
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 18px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.switch input { appearance: none; margin: 0; width: 42px; height: 24px; border-radius: 12px; border: 1.5px solid var(--ink-2); position: relative; cursor: pointer; flex: none; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 15px; height: 15px; border-radius: 50%; background: var(--ink-2); transition: transform .15s; }
+.switch input:checked { background: var(--pen); border-color: var(--pen); }
+.switch input:checked::after { transform: translateX(18px); background: var(--paper); }
+
+.feedback { min-height: 3.5em; }
+.feedback .label { font-weight: 700; margin-right: 6px; }
+.feedback .label.ok { color: var(--pen); }
+.feedback .label.ng { color: var(--ink-2); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.btn {
+  padding: 9px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn.quiet { background: none; color: var(--ink); border-color: var(--line); font-weight: 400; }
+@media (hover: hover) {
+  .btn:hover { opacity: .85; }
+  .btn.quiet:hover { background: var(--paper-2); opacity: 1; }
+}
+
+/* ---- スマホ幅：見本が上、説明が下 ---- */
+@media (max-width: 900px) {
+  .bar { gap: 16px; padding: 0 0 0 16px; }
+  .brand small { display: none; }
+  .layout { display: block; height: auto; }
+  /* 説明を読みながら見本を見られるよう、見本は画面の上に留める */
+  .stage { padding: 12px; position: sticky; top: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .browser { height: 46dvh; }
+  .panel { border-left: 0; padding: 20px 16px 48px; overflow: visible; }
+}
+
+/* 赤ペンの書き込み（見本の上に重ねる） */
+.overlay { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.overlay text {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--stage-pen);
+  stroke: #fffaf0;
+  stroke-width: 4px;
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+
+/* ============================================================
+   教材：架空のカフェのサイト「ひだまり珈琲店」
+   アプリとは別のお店の見た目にしている
+   ============================================================ */
+.site {
+  --c-bg: #f7f0e3;
+  --c-paper: #fbf6ec;
+  --c-ink: #3b2a1f;
+  --c-sub: #74604f;
+  --c-accent: #8a5226;
+  --c-line: #e2d3bb;
+  --c-serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  position: relative;
+  container-type: inline-size;
+  min-height: 100%;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.site [hidden] { display: none !important; }
+.site.quiz [data-part] { cursor: pointer; }
+.site a { color: inherit; text-decoration: none; }
+
+.s-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 32px;
+  background: var(--c-paper);
+  border-bottom: 1px solid var(--c-line);
+}
+.s-logo { display: flex; align-items: center; gap: 10px; font-family: var(--c-serif); font-weight: 700; font-size: 19px; letter-spacing: .06em; }
+.s-nav ul { display: flex; gap: 24px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.s-nav a { border-bottom: 1px solid transparent; padding-bottom: 2px; }
+.s-nav a:hover { border-bottom-color: var(--c-accent); }
+
+.s-fv {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  align-items: center;
+  gap: 32px;
+  padding: 64px 32px 72px;
+}
+.s-fv h1 { font-family: var(--c-serif); font-size: 34px; line-height: 1.45; margin: 0 0 16px; letter-spacing: .04em; }
+.s-fv p { margin: 0 0 28px; color: var(--c-sub); }
+.s-btn { display: inline-block; padding: 11px 22px; background: var(--c-accent); color: #fbf6ec !important; border-radius: 3px; font-size: 14px; letter-spacing: .06em; }
+.s-fv svg { width: 100%; max-width: 280px; justify-self: center; }
+
+.s-section { padding: 56px 32px; border-top: 1px solid var(--c-line); }
+.s-section h2 { font-family: var(--c-serif); font-size: 22px; margin: 0 0 24px; letter-spacing: .08em; }
+.s-menu { margin: 0; max-width: 560px; }
+.s-menu .row { display: flex; align-items: baseline; gap: 12px; font-weight: 600; }
+.s-menu .row::after { content: ""; order: 1; flex: 1; border-bottom: 1px dotted var(--c-sub); transform: translateY(-4px); }
+.s-menu .price { order: 2; font-family: var(--c-serif); }
+.s-menu dd { margin: 4px 0 22px; color: var(--c-sub); font-size: 14px; }
+.s-info { display: grid; grid-template-columns: 7em 1fr; gap: 10px 16px; margin: 0; max-width: 560px; }
+.s-info dt { color: var(--c-sub); font-size: 14px; }
+.s-info dd { margin: 0; }
+
+.s-footer { padding: 28px 32px; background: #3b2a1f; color: #e9dcc6; font-size: 13px; }
+.s-footer p { margin: 0; }
+.s-footer p + p { margin-top: 4px; color: #bfae95; }
+
+/* 見本サイト自身のレスポンシブ（見本の枠の幅で切り替わる） */
+@container (max-width: 620px) {
+  .s-header { flex-direction: column; align-items: flex-start; padding: 14px 20px; gap: 8px; }
+  .s-nav ul { gap: 16px; flex-wrap: wrap; }
+  .s-fv { grid-template-columns: 1fr; padding: 36px 20px 44px; gap: 20px; }
+  .s-fv h1 { font-size: 26px; }
+  .s-fv svg { max-width: 140px; justify-self: start; grid-row: 1; }
+  .s-section { padding: 40px 20px; }
+  .s-footer { padding: 24px 20px; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand"><span data-t="app.name"></span><small data-t="app.note"></small></div>
+  <nav aria-labelledby="terms-label">
+    <span id="terms-label" hidden data-t="app.termsLabel"></span>
+    <ol class="terms" id="terms"></ol>
+  </nav>
+</header>
+
+<div class="layout">
+  <section class="stage" aria-labelledby="stage-label">
+    <span id="stage-label" hidden data-t="app.stageLabel"></span>
+    <div class="browser">
+      <div class="browser-bar" aria-hidden="true">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span data-t="site.url"></span>
+      </div>
+      <div class="viewport" id="viewport">
+
+        <!-- ここから見本のサイト -->
+        <div class="site" id="site">
+          <header class="s-header" data-part="header">
+            <a href="#" class="s-logo" data-part="logo">
+              <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+                <circle cx="14" cy="14" r="13" fill="#f1dcb4"/>
+                <path d="M8 13h10v3a5 5 0 0 1-10 0z" fill="#8a5226"/>
+                <path d="M18 14h1.5a2 2 0 0 1 0 4H18" fill="none" stroke="#8a5226" stroke-width="1.5"/>
+              </svg>
+              <span data-t="site.name"></span>
+            </a>
+            <nav class="s-nav" data-part="nav">
+              <ul>
+                <li><a href="#" data-t="site.nav.menu"></a></li>
+                <li><a href="#" data-t="site.nav.about"></a></li>
+                <li><a href="#" data-t="site.nav.access"></a></li>
+                <li><a href="#" data-t="site.nav.news"></a></li>
+              </ul>
+            </nav>
+          </header>
+
+          <section class="s-fv" data-part="fv">
+            <div>
+              <h1 data-t="site.fv.title"></h1>
+              <p data-t="site.fv.body"></p>
+              <a href="#" class="s-btn" data-t="site.fv.button"></a>
+            </div>
+            <svg viewBox="0 0 240 200" aria-hidden="true">
+              <circle cx="150" cy="78" r="62" fill="#f1dcb4"/>
+              <path d="M96 40c-8 10 8 16 0 28M118 34c-8 10 8 16 0 28M140 40c-8 10 8 16 0 28" fill="none" stroke="#b9a283" stroke-width="3" stroke-linecap="round"/>
+              <ellipse cx="118" cy="170" rx="86" ry="14" fill="#e2d3bb"/>
+              <path d="M62 86h112v34c0 30-25 52-56 52s-56-22-56-52z" fill="#fbf6ec" stroke="#3b2a1f" stroke-width="3"/>
+              <path d="M174 98h10a18 18 0 0 1 0 36h-14" fill="none" stroke="#3b2a1f" stroke-width="3"/>
+              <ellipse cx="118" cy="86" rx="56" ry="9" fill="#6b3d1c" stroke="#3b2a1f" stroke-width="3"/>
+            </svg>
+          </section>
+
+          <section class="s-section" data-part="menu">
+            <h2 data-t="site.menu.title"></h2>
+            <dl class="s-menu" id="s-menu"></dl>
+          </section>
+
+          <section class="s-section" data-part="info">
+            <h2 data-t="site.info.title"></h2>
+            <dl class="s-info" id="s-info"></dl>
+          </section>
+
+          <footer class="s-footer" data-part="footer">
+            <p data-t="site.footer.copy"></p>
+            <p data-t="site.footer.note"></p>
+          </footer>
+
+          <svg class="overlay" id="overlay" aria-hidden="true"></svg>
+        </div>
+        <!-- 見本のサイトここまで -->
+
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+
+<script>
+/* ============================================================
+   画面に出る文章は、すべてここにまとめる。
+   英語を足すときは、ja と同じ形で en を並べる。
+   ============================================================ */
+const TEXT = {
+  ja: {
+    app: {
+      name: 'Web Terms',
+      note: '試作版',
+      termsLabel: '学ぶ用語',
+      stageLabel: '見本のサイト',
+      soon: '準備中',
+      done: '済',
+      doneLabel: '学習済み',
+      count: '用語 {n} / {total}',
+      steps: { look: '見る', touch: '触る', check: '確かめる' },
+      next: '次へ：{step}',
+      retry: 'もう一度',
+      ok: '正解',
+      ng: 'ちがいます',
+    },
+    parts: {
+      header: 'ヘッダー',
+      logo: 'ロゴ',
+      nav: 'ナビゲーション',
+      fv: 'ファーストビュー',
+      menu: 'メニュー',
+      info: '営業時間・アクセス',
+      footer: 'フッター',
+    },
+    terms: {
+      header: {
+        name: 'ヘッダー',
+        en: 'Header',
+        lead: 'ページのいちばん上にある、横長の帯のこと。',
+        look: {
+          p1: '見本のサイトで、赤い線で囲んだところがヘッダーです。',
+          p2: 'このヘッダーには、次の2つが入っています。押すと、見本の中で場所を示します。',
+          items: [
+            { part: 'logo', desc: 'お店やサイトの名前・マーク' },
+            { part: 'nav', desc: 'ほかのページへの入り口' },
+          ],
+          p3: 'ヘッダーは、ほとんどのサイトで全ページ共通です。どのページにいても、ここを見れば「どこのサイトか」「どこへ行けるか」がわかります。',
+          tip: '見本のほかの場所にも、マウスを乗せて（スマホではタップして）みましょう。それぞれの名前が出ます。',
+        },
+        touch: {
+          p1: 'ヘッダーをなくすと、サイトはどう見えるでしょう。スイッチを入れて、見本を見比べてみましょう。',
+          switch: 'ヘッダーを隠す',
+          after: 'どこのお店のサイトか、メニューやアクセスへどう行けばいいか、わかりにくくなりました。ヘッダーは、サイトの「看板」と「案内板」をまとめて引き受けています。',
+        },
+        check: {
+          q: '見本の中で、ヘッダーだと思う場所をクリック（スマホではタップ）してください。',
+          keys: 'キーボードでは Tab で場所を選び、Enter で答えられます。',
+          correct: 'ページのいちばん上の帯がヘッダーです。',
+          correctSub: 'そこはヘッダーの中の「{name}」でした。{name}も、ヘッダーの一部です。',
+          wrong: 'そこは「{name}」です。ヘッダーは、ページのいちばん上にあります。',
+          done: 'これで「ヘッダー」は学び終わりです。次の用語は準備中です。',
+        },
+      },
+      nav: { name: 'ナビゲーション', en: 'Navigation' },
+      fv: { name: 'ファーストビュー', en: 'Above the Fold' },
+      space: { name: '余白', en: 'Whitespace' },
+      lineHeight: { name: '行間', en: 'Line Height' },
+    },
+    site: {
+      url: 'hidamari-coffee.example',
+      name: 'ひだまり珈琲店',
+      nav: { menu: 'メニュー', about: 'お店について', access: 'アクセス', news: 'お知らせ' },
+      fv: {
+        title: '朝の光と、深煎りの一杯。',
+        body: '駅から歩いて3分の、小さな喫茶店です。毎朝7時に開きます。',
+        button: 'メニューを見る',
+      },
+      menu: {
+        title: 'メニュー',
+        items: [
+          { name: 'ひだまりブレンド', price: '480円', desc: '深煎りの豆を3種類合わせた、店の看板です。苦みの奥に、ほのかな甘さがあります。' },
+          { name: 'カフェオレ', price: '560円', desc: 'ブレンドを濃いめにいれて、温めた牛乳と半分ずつ合わせています。' },
+          { name: '厚切りトースト', price: '420円', desc: '近くのパン屋さんの食パンを、4センチの厚さに切って焼きます。' },
+          { name: '季節のケーキ', price: '520円', desc: '月替わりです。いまは、りんごのタルトをお出ししています。' },
+        ],
+      },
+      info: {
+        title: '営業時間・アクセス',
+        rows: [
+          ['営業時間', '7:00〜18:00'],
+          ['定休日', '水曜日'],
+          ['住所', 'ひだまり町1-2-3（架空の住所です）'],
+          ['最寄り駅', 'ひだまり駅から歩いて3分'],
+        ],
+      },
+      footer: {
+        copy: '© ひだまり珈琲店',
+        note: 'このお店は、Web Terms の練習用につくった架空のお店です。',
+      },
+    },
+  },
+};
+
+/* 学ぶ用語の並び。ready が true のものだけ学べる */
+const TERMS = [
+  { id: 'header', ready: true },
+  { id: 'nav', ready: false },
+  { id: 'fv', ready: false },
+  { id: 'space', ready: false },
+  { id: 'lineHeight', ready: false },
+];
+const STEPS = ['look', 'touch', 'check'];
+
+let lang = 'ja';
+const t = (key, vars) => {
+  let s = key.split('.').reduce((o, k) => (o == null ? o : o[k]), TEXT[lang]);
+  if (s == null) return key;
+  if (vars && typeof s === 'string') s = s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+  return s;
+};
+
+/* 進み具合は、このブラウザの中にだけ覚えておく（使えなくても動く） */
+const STORE_KEY = 'webterms.progress';
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+}
+function saveProgress() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state.progress)); } catch { /* 覚えられなくても続ける */ }
+}
+
+const state = {
+  term: 'header',
+  step: 'look',
+  hover: null,      // 見る：マウスが乗っている部分
+  pinned: null,     // 見る：パネルのボタンで示している部分
+  hidden: false,    // 触る：ヘッダーを隠しているか
+  answer: null,     // 確かめる：{ correct, el, x, y }
+  progress: loadProgress(),
+};
+
+/* ---- 小さな道具 ---- */
+const $ = (s, root = document) => root.querySelector(s);
+const site = $('#site');
+const overlay = $('#overlay');
+const panel = $('#panel');
+const part = (name) => site.querySelector(`[data-part="${name}"]`);
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'on') for (const [ev, fn] of Object.entries(v)) el.addEventListener(ev, fn);
+    else if (k === 'class') el.className = v;
+    else if (v === true) el.setAttribute(k, '');
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  for (const c of children.flat()) if (c != null) el.append(c);
+  return el;
+}
+
+/* ---- 文章を流し込む ---- */
+function applyText() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
+  $('#s-menu').replaceChildren(...t('site.menu.items').flatMap((m) => [
+    h('dt', { class: 'row' }, m.name, h('span', { class: 'price' }, m.price)),
+    h('dd', {}, m.desc),
+  ]));
+  $('#s-info').replaceChildren(...t('site.info.rows').flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
+}
+
+/* ---- 上の帯：5語 ---- */
+function renderTerms() {
+  $('#terms').replaceChildren(...TERMS.map((term, i) => {
+    const done = state.progress[term.id];
+    return h('li', {},
+      h('button', {
+        type: 'button',
+        disabled: !term.ready,
+        'aria-current': term.id === state.term ? 'step' : false,
+        on: { click: () => { state.term = term.id; setStep('look'); } },
+      },
+        h('span', { class: 'num' }, String(i + 1).padStart(2, '0')),
+        t(`terms.${term.id}.name`),
+        !term.ready ? h('span', { class: 'soon' }, t('app.soon')) : null,
+        done ? h('span', { class: 'stamp', title: t('app.doneLabel'), 'aria-label': t('app.doneLabel') }, t('app.done')) : null,
+      ));
+  }));
+}
+
+/* ---- 右の説明パネル ---- */
+function renderPanel() {
+  const T = (k, v) => t(`terms.${state.term}.${k}`, v);
+  const idx = TERMS.findIndex((x) => x.id === state.term);
+
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }, STEPS.map((s, i) => h('button', {
+    type: 'button',
+    role: 'tab',
+    'aria-selected': String(s === state.step),
+    on: { click: () => setStep(s) },
+  }, h('span', { class: 'num' }, i + 1), t(`app.steps.${s}`))));
+
+  const nextStep = STEPS[STEPS.indexOf(state.step) + 1];
+  const nextBtn = nextStep
+    ? h('button', { type: 'button', class: 'btn', on: { click: () => setStep(nextStep) } }, t('app.next', { step: t(`app.steps.${nextStep}`) }))
+    : null;
+
+  let body;
+  if (state.step === 'look') {
+    body = h('div', { class: 'step', role: 'tabpanel' },
+      h('p', {}, T('look.p1')),
+      h('p', {}, T('look.p2')),
+      h('ul', { class: 'parts' }, T('look.items').map((it) => h('li', {},
+        h('button', {
+          type: 'button',
+          'aria-pressed': String(state.pinned === it.part),
+          on: { click: () => pin(it.part) },
+        }, h('b', {}, t(`parts.${it.part}`)), h('span', {}, it.desc))))),
+      h('p', {}, T('look.p3')),
+      h('p', { class: 'sub' }, T('look.tip')),
+      h('div', { class: 'actions' }, nextBtn));
+  } else if (state.step === 'touch') {
+    body = h('div', { class: 'step', role: 'tabpanel' },
+      h('p', {}, T('touch.p1')),
+      h('label', { class: 'switch' },
+        h('input', {
+          type: 'checkbox',
+          role: 'switch',
+          checked: state.hidden,
+          on: { change: (e) => { state.hidden = e.target.checked; applyHidden(); renderPanel(); } },
+        }),
+        T('touch.switch')),
+      state.hidden ? h('p', {}, T('touch.after')) : null,
+      h('div', { class: 'actions' }, nextBtn));
+  } else {
+    const a = state.answer;
+    let feedback = null;
+    if (a && a.correct) {
+      const sub = a.name !== 'header';
+      feedback = [
+        h('p', {}, h('span', { class: 'label ok' }, t('app.ok')), sub ? T('check.correctSub', { name: t(`parts.${a.name}`) }) : T('check.correct')),
+        h('p', { class: 'sub' }, T('check.done')),
+      ];
+    } else if (a) {
+      feedback = h('p', {}, h('span', { class: 'label ng' }, t('app.ng')), T('check.wrong', { name: t(`parts.${a.name}`) }));
+    }
+    body = h('div', { class: 'step', role: 'tabpanel' },
+      h('p', {}, T('check.q')),
+      h('p', { class: 'sub' }, T('check.keys')),
+      h('div', { class: 'feedback' }, feedback),
+      a ? h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn quiet', on: { click: () => { state.answer = null; renderPanel(); draw(); } } }, t('app.retry'))) : null);
+  }
+
+  panel.replaceChildren(
+    h('p', { class: 'count' }, t('app.count', { n: idx + 1, total: TERMS.length })),
+    h('h1', { class: 'term-name' }, T('name')),
+    h('p', { class: 'term-en', lang: 'en' }, T('en')),
+    h('p', { class: 'lead' }, T('lead')),
+    tabs,
+    body,
+  );
+}
+
+/* ---- 段階の切り替え ---- */
+function setStep(step) {
+  state.step = step;
+  state.hover = null;
+  state.pinned = null;
+  state.answer = null;
+  if (step !== 'touch') state.hidden = false;
+  applyHidden();
+  const quiz = step === 'check';
+  site.classList.toggle('quiz', quiz);
+  site.querySelectorAll('[data-part]').forEach((el) => {
+    if (quiz) el.tabIndex = 0;
+    else el.removeAttribute('tabindex');
+  });
+  renderTerms();
+  renderPanel();
+  draw();
+}
+
+function applyHidden() {
+  part('header').hidden = state.hidden;
+  draw();
+}
+
+function pin(name) {
+  state.pinned = state.pinned === name ? null : name;
+  if (state.pinned) {
+    // ページ全体は動かさず、見本の枠の中だけをスクロールする
+    const vp = $('#viewport');
+    const b = boxOf(part(name));
+    if (b.y < vp.scrollTop || b.y + b.h > vp.scrollTop + vp.clientHeight) {
+      vp.scrollTo({ top: Math.max(0, b.y - 24), behavior: 'smooth' });
+    }
+  }
+  renderPanel();
+  draw();
+}
+
+/* ---- 確かめる：答え合わせ ---- */
+function answer(target, x, y) {
+  const el = target.closest('[data-part]');
+  if (!el) return;
+  const correct = !!el.closest('[data-part="header"]');
+  state.answer = { correct, el, name: el.dataset.part, x, y };
+  if (correct && !state.progress.header) {
+    state.progress.header = true;
+    saveProgress();
+    renderTerms();
+  }
+  renderPanel();
+  draw();
+}
+
+/* ============================================================
+   赤ペンの書き込み（SVG）
+   ============================================================ */
+const NS = 'http://www.w3.org/2000/svg';
+const svg = (tag, attrs) => {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+};
+function boxOf(el) {
+  const r = el.getBoundingClientRect();
+  const s = site.getBoundingClientRect();
+  return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+}
+
+/* 囲み＋引き出し線＋名前 */
+function annotate(el, label, { dashed = false } = {}) {
+  if (!el || el.hidden) return [];
+  const b = boxOf(el);
+  const W = site.offsetWidth;
+  const H = site.offsetHeight;
+  const out = [svg('rect', {
+    x: b.x + 3, y: b.y + 3, width: Math.max(0, b.w - 6), height: Math.max(0, b.h - 6),
+    fill: 'none', stroke: 'var(--stage-pen)', 'stroke-width': dashed ? 1.5 : 2.5,
+    'stroke-dasharray': dashed ? '6 4' : 'none', rx: 2,
+  })];
+  // 実線（主役）の名前は左、点線（補足）の名前は右に書いて、重ならないようにする
+  const textW = label.length * 14;
+  const right = dashed || b.x + 18 + textW + 12 > W;
+  const lx = right ? b.x + b.w - 18 : b.x + 18;
+  // 名前は、いま見えている範囲に収まる側に書く（下 → 上 → 枠の内側の順に試す）
+  const vp = $('#viewport');
+  const seenTop = vp.scrollTop;
+  const seenBottom = Math.min(H, vp.scrollTop + vp.clientHeight);
+  const len = dashed ? 30 : 18;   // 補足の名前は少し長い線で離して書く
+  let where = 'inside';
+  if (b.y + b.h + len + 16 < seenBottom && b.y + b.h > seenTop) where = 'below';
+  else if (b.y - len - 16 > seenTop && b.y < seenBottom) where = 'above';
+  const tx = right ? lx - 6 : lx + 6;
+  if (where === 'inside') {
+    const y = Math.max(b.y, seenTop) + 12;
+    const text = svg('text', { x: tx, y, 'text-anchor': right ? 'end' : 'start', 'dominant-baseline': 'hanging' });
+    text.textContent = label;
+    out.push(text);
+    return out;
+  }
+  const below = where === 'below';
+  const y0 = below ? b.y + b.h - 3 : b.y + 3;
+  const y1 = below ? y0 + len : y0 - len;
+  const ty = below ? y1 + 5 : y1 + 1;
+  out.push(
+    svg('circle', { cx: lx, cy: y0, r: 3, fill: 'var(--stage-pen)' }),
+    svg('path', { d: `M${lx} ${y0} L${lx} ${y1}`, fill: 'none', stroke: 'var(--stage-pen)', 'stroke-width': 1.5 }),
+  );
+  const text = svg('text', { x: tx, y: ty, 'text-anchor': right ? 'end' : 'start', 'dominant-baseline': below ? 'hanging' : 'auto' });
+  text.textContent = label;
+  out.push(text);
+  return out;
+}
+
+/* 正解の赤丸 */
+function circle(el, label) {
+  const b = boxOf(el);
+  const cx = b.x + b.w / 2;
+  const cy = b.y + b.h / 2;
+  const rx = b.w / 2 - 14;
+  const ry = b.h / 2 - 4;
+  // 手で描いたように、少しゆがませて1周より少し多く回す
+  const start = Math.PI * 1.1;
+  const pts = [];
+  for (let i = 0; i <= 80; i++) {
+    const a = start + (Math.PI * 2.12 * i) / 80;
+    const k = 1 + 0.02 * Math.sin(a * 3) - 0.08 * (i / 80);
+    pts.push(`${(cx + rx * k * Math.cos(a)).toFixed(1)} ${(cy + ry * k * Math.sin(a)).toFixed(1)}`);
+  }
+  const d = `M${pts.join(' L')}`;
+  const text = svg('text', { x: b.x + 18, y: b.y + b.h + 8, 'dominant-baseline': 'hanging' });
+  text.textContent = label;
+  return [svg('path', { d, fill: 'none', stroke: 'var(--stage-pen)', 'stroke-width': 2.5, 'stroke-linecap': 'round' }), text];
+}
+
+/* ちがう場所につける × */
+function cross(x, y) {
+  const s = 8;
+  return [svg('path', {
+    d: `M${x - s} ${y - s} L${x + s} ${y + s} M${x + s} ${y - s} L${x - s} ${y + s}`,
+    stroke: 'var(--stage-pen)', 'stroke-width': 2.5, 'stroke-linecap': 'round',
+  })];
+}
+
+function draw() {
+  overlay.setAttribute('width', site.offsetWidth);
+  overlay.setAttribute('height', site.offsetHeight);
+  const marks = [];
+  const name = (el) => t(`parts.${el.dataset.part}`);
+
+  if (state.step === 'look') {
+    const header = part('header');
+    marks.push(...annotate(header, name(header)));
+    const extra = state.pinned ? part(state.pinned) : state.hover;
+    if (extra && extra !== header) marks.push(...annotate(extra, name(extra), { dashed: true }));
+  }
+  if (state.step === 'check' && state.answer) {
+    const a = state.answer;
+    if (a.correct) marks.push(...circle(part('header'), t('app.ok')));
+    else marks.push(...annotate(a.el, name(a.el), { dashed: true }), ...cross(a.x, a.y));
+  }
+  overlay.replaceChildren(...marks);
+}
+
+/* ---- 見本のサイトでの操作 ---- */
+site.addEventListener('pointermove', (e) => {
+  if (state.step !== 'look' || state.pinned) return;
+  const el = e.target.closest('[data-part]');
+  if (el !== state.hover) { state.hover = el; draw(); }
+});
+site.addEventListener('pointerleave', () => {
+  if (state.step !== 'look' || state.pinned) return;
+  state.hover = null;
+  draw();
+});
+site.addEventListener('click', (e) => {
+  if (e.target.closest('a')) e.preventDefault();  // 見本のリンクではページを移動しない
+  if (state.step === 'look') {
+    if (state.pinned) { state.pinned = null; renderPanel(); }
+    state.hover = e.target.closest('[data-part]');
+    draw();
+  } else if (state.step === 'check') {
+    const s = site.getBoundingClientRect();
+    answer(e.target, e.clientX - s.left, e.clientY - s.top);
+  }
+});
+site.addEventListener('keydown', (e) => {
+  if (state.step !== 'check' || (e.key !== 'Enter' && e.key !== ' ')) return;
+  const el = e.target.closest('[data-part]');
+  if (!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const b = boxOf(el);
+  answer(el, b.x + Math.min(b.w / 2, 40), b.y + b.h / 2);
+});
+
+new ResizeObserver(() => draw()).observe(site);
+// 見本をスクロールしたら、名前を見える位置に書き直す
+let drawQueued = false;
+$('#viewport').addEventListener('scroll', () => {
+  if (drawQueued) return;
+  drawQueued = true;
+  requestAnimationFrame(() => { drawQueued = false; draw(); });
+}, { passive: true });
+
+/* ---- はじめる ---- */
+applyText();
+setStep('look');
+</script>
+</body>
+</html>
