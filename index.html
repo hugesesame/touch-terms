@@ -369,6 +369,8 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .site.compact .s-nav { display: none; }
 .site.compact .s-burger { display: inline-grid; }
 .site.compact .s-header { flex-direction: row; align-items: center; }
+/* 固定ヘッダーの用語のときだけ、ヘッダーを見本の画面の上にくっつける */
+.site.sticky .s-header { position: sticky; top: 0; z-index: 4; }
 
 /* ヒーロー */
 .s-hero {
@@ -403,6 +405,9 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .s-info { display: grid; grid-template-columns: 7em 1fr; gap: calc(10px * var(--sp)) calc(16px * var(--sp)); margin: 0; max-width: 560px; }
 .s-info dt { color: var(--c-sub); font-size: 14px; }
 .s-info dd { margin: 0; }
+/* 「セクション」の触る用：見出しと区切りをなくして、まとまりをわからなくする */
+.site.flat .s-section { border-top: 0; padding-block: calc(6px * var(--sp)); }
+.site.flat .s-section h2 { display: none; }
 
 /* カルーセル */
 .s-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border: 1px solid var(--c-line); border-radius: 4px; background: var(--c-paper); }
@@ -439,7 +444,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .s-card p { margin: 4px 0 0; font-size: 13px; color: var(--c-sub); line-height: 1.7; word-break: normal; }   /* 幅がせまいので、文節ではなくふつうに折り返す */
 
 /* 商品のページ */
-.s-crumbs { padding: calc(20px * var(--sp)) calc(32px * var(--sp)) 0; font-size: 13px; color: var(--c-sub); }
+.s-crumbs { padding: calc(20px * var(--sp)) calc(32px * var(--sp)) 8px; font-size: 13px; color: var(--c-sub); }
 .s-crumbs ol { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .s-crumbs li + li::before { content: "›"; margin-right: 8px; }
 .s-crumbs a { border-bottom: 1px solid currentColor; }
@@ -515,9 +520,14 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .s-drawer ul { list-style: none; margin: 8px 0 0; padding: 0; }
 .s-drawer a { display: block; padding: 14px 2px; border-bottom: 1px solid var(--c-line); font-size: 15px; }
 
-.s-footer { padding: calc(28px * var(--sp)) calc(32px * var(--sp)); background: #3b2a1f; color: #e9dcc6; font-size: 13px; }
+.s-footer { padding: calc(32px * var(--sp)) calc(32px * var(--sp)) calc(24px * var(--sp)); background: #3b2a1f; color: #e9dcc6; font-size: 13px; }
 .s-footer p { margin: 0; }
-.s-footer p + p { margin-top: 4px; color: #bfae95; }
+.s-foot-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px 32px; padding-bottom: calc(20px * var(--sp)); margin-bottom: calc(16px * var(--sp)); border-bottom: 1px solid #5a4636; }
+.s-foot-name { font-family: var(--c-serif); font-size: 16px; font-weight: 700; letter-spacing: .06em; margin-bottom: 4px !important; }
+.s-foot-nav ul { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; }
+.s-foot-nav a { border-bottom: 1px solid transparent; }
+.s-foot-nav a:hover { border-bottom-color: currentColor; }
+.s-foot-note { margin-top: 4px !important; color: #bfae95; }
 
 /* 見本サイト自身のレスポンシブ（見本の枠の幅で切り替わる） */
 @container (max-width: 620px) {
@@ -534,10 +544,11 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
   .s-tabs button { padding: 10px 12px; }
   .s-grid { grid-template-columns: 1fr 1fr; gap: calc(12px * var(--sp)); padding: calc(20px * var(--sp)) calc(20px * var(--sp)) calc(40px * var(--sp)); }
   .s-card p { display: none; }
-  .s-crumbs { padding: calc(16px * var(--sp)) calc(20px * var(--sp)) 0; }
+  .s-crumbs { padding: calc(16px * var(--sp)) calc(20px * var(--sp)) 8px; }
   .s-item { grid-template-columns: 1fr; padding: calc(18px * var(--sp)) calc(20px * var(--sp)) calc(40px * var(--sp)); }
   .s-row2 { grid-template-columns: 1fr; }
   .s-footer { padding: calc(24px * var(--sp)) calc(20px * var(--sp)); }
+  .s-foot-top { flex-direction: column; }
 }
 </style>
 </head>
@@ -603,14 +614,14 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
             <div data-page="home">
               <section class="s-hero" data-part="hero">
                 <div>
-                  <h1 data-t="site.hero.title"></h1>
-                  <p data-t="site.hero.body"></p>
+                  <h1 data-part="catch" data-t="site.hero.title"></h1>
+                  <p data-part="heroText" data-t="site.hero.body"></p>
                   <div class="s-hero-actions">
                     <a href="#" class="s-btn" data-part="cta" data-go="reserve" data-t="site.hero.button"></a>
                     <a href="#" class="s-sublink" data-part="sublink" data-go="menu" data-t="site.hero.sub"></a>
                   </div>
                 </div>
-                <svg viewBox="0 0 240 200" aria-hidden="true">
+                <svg viewBox="0 0 240 200" aria-hidden="true" data-part="visual">
                   <circle cx="150" cy="78" r="62" fill="#f1dcb4"/>
                   <path d="M96 40c-8 10 8 16 0 28M118 34c-8 10 8 16 0 28M140 40c-8 10 8 16 0 28" fill="none" stroke="#b9a283" stroke-width="3" stroke-linecap="round"/>
                   <ellipse cx="118" cy="170" rx="86" ry="14" fill="#e2d3bb"/>
@@ -653,6 +664,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 
             <!-- メニュー一覧のページ -->
             <div data-page="menu" hidden>
+              <nav class="s-crumbs" data-part="breadcrumb" data-crumbs="menu"></nav>
               <div class="s-pagehead" data-part="pagehead">
                 <h1 data-t="site.menuPage.title"></h1>
                 <p data-t="site.menuPage.lead"></p>
@@ -663,12 +675,13 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 
             <!-- 商品のページ -->
             <div data-page="item" hidden>
-              <nav class="s-crumbs" data-part="breadcrumb" id="s-crumbs"></nav>
+              <nav class="s-crumbs" data-part="breadcrumb" data-crumbs="item"></nav>
               <div class="s-item" id="s-item"></div>
             </div>
 
             <!-- 予約のページ -->
             <div data-page="reserve" hidden>
+              <nav class="s-crumbs" data-part="breadcrumb" data-crumbs="reserve"></nav>
               <div class="s-pagehead" data-part="pagehead">
                 <h1 data-t="site.reserve.title"></h1>
                 <p data-t="site.reserve.lead"></p>
@@ -684,8 +697,23 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
           </main>
 
           <footer class="s-footer" data-part="footer">
-            <p data-t="site.footer.copy"></p>
-            <p data-t="site.footer.note"></p>
+            <div class="s-foot-top">
+              <div data-part="shopInfo">
+                <p class="s-foot-name" data-t="site.name"></p>
+                <p data-t="site.footer.address"></p>
+                <p data-t="site.footer.hours"></p>
+              </div>
+              <nav class="s-foot-nav" data-part="footerNav">
+                <ul>
+                  <li><a href="#" data-go="menu" data-t="site.nav.menu"></a></li>
+                  <li><a href="#" data-go="home#about" data-t="site.nav.about"></a></li>
+                  <li><a href="#" data-go="home#info" data-t="site.nav.access"></a></li>
+                  <li><a href="#" data-go="reserve" data-t="site.nav.reserve"></a></li>
+                </ul>
+              </nav>
+            </div>
+            <p data-part="copyright" data-t="site.footer.copy"></p>
+            <p class="s-foot-note" data-t="site.footer.note"></p>
           </footer>
 
           <!-- モーダルとドロワーの層 -->
@@ -780,6 +808,12 @@ const TEXT = {
       close: '閉じるボタン',
       drawer: 'ドロワー',
       footer: 'フッター',
+      catch: 'キャッチコピー',
+      heroText: '説明文',
+      visual: 'メインの絵',
+      shopInfo: 'お店の情報',
+      footerNav: 'フッターのリンク',
+      copyright: 'コピーライト',
     },
     terms: {
       /* ===== 1章 ページの骨組み ===== */
@@ -839,9 +873,89 @@ const TEXT = {
           wrong: 'そこは「{name}」です。ナビゲーションは、ページの上のほうで、ほかのページの名前が並んでいるところです。',
         },
       },
-      hero: { name: 'ヒーロー（メインビジュアル）', en: 'Hero' },
-      section: { name: 'セクション', en: 'Section' },
-      footer: { name: 'フッター', en: 'Footer' },
+      hero: {
+        name: 'ヒーロー（メインビジュアル）',
+        en: 'Hero',
+        lead: 'ページを開いて最初に目に入る、大きな見出しと絵や写真の場所。',
+        look: {
+          p1: '見本のトップページで、赤い線で囲んだところがヒーローです。ヘッダーのすぐ下にあります。',
+          p2: 'このヒーローには、次のものが入っています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'catch', label: 'キャッチコピー', desc: 'ページの顔になる、短い言葉' },
+            { id: 'heroText', label: '説明文', desc: 'どんなお店かを、ひとことで伝える' },
+            { id: 'cta', label: 'CTA', desc: 'いちばんしてほしいこと（予約）へのボタン' },
+            { id: 'visual', label: 'メインの絵', desc: 'お店の雰囲気を伝える、大きな絵や写真' },
+          ],
+          p3: 'ヒーローは、サイトの第一印象を決める場所です。「何のサイトか」「どんな雰囲気か」「次に何をすればいいか」を、ひと目で伝えます。',
+          tip: '日本では「メインビジュアル」とも呼びます。英語では "hero"（主役）と言い、"hero image" や "hero section" とも呼びます。',
+        },
+        touch: {
+          p1: 'ヒーローをなくすと、トップページはどう見えるでしょう。スイッチを入れて、見本を見比べてみましょう。',
+          switch: 'ヒーローを外す',
+          after: 'ページを開くと、いきなり「季節のおすすめ」から始まります。何のお店か、どんな雰囲気のお店かが、伝わりにくくなりました。',
+        },
+        check: {
+          q: '見本の中で、ヒーローだと思う場所をクリック（スマホではタップ）してください。',
+          correct: 'ヘッダーのすぐ下の、大きな見出しと絵の場所がヒーローです。',
+          correctSub: 'そこはヒーローの中の「{name}」でした。{name}も、ヒーローの一部です。',
+          wrong: 'そこは「{name}」です。ヒーローは、ページを開いて最初に目に入る、大きな場所です。',
+        },
+      },
+      section: {
+        name: 'セクション',
+        en: 'Section',
+        lead: 'ページの中を、話題ごとに分けたひとまとまりのこと。',
+        look: {
+          p1: '見本のトップページは、話題ごとのまとまりに分かれています。赤い線で囲んだひとつひとつがセクションです。スクロールして、ほかのセクションも見てみましょう。',
+          p2: 'ひとつのセクションは、次の2つでできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'heading', label: '見出し', desc: '何についてのまとまりかを示す' },
+            { id: 'content', label: '中身', desc: '見出しの話題についての文章や表' },
+          ],
+          p3: 'セクションどうしは、区切り線や余白、背景の色で分けます。見出しを拾い読みすれば、読みたい場所をすぐ見つけられます。',
+          tip: 'いちばん上のヒーローも、大きなセクションのひとつとして数えることがあります。',
+        },
+        touch: {
+          p1: '見出しと区切り線をなくすと、どう見えるでしょう。スイッチを入れて、見本を見比べてみましょう。',
+          switch: '見出しと区切り線をなくす',
+          after: 'どこからどこまでが何の話か、わからなくなりました。メニューの説明とお店の紹介が、ひと続きの文章のように見えます。',
+        },
+        check: {
+          q: 'お店の住所は、どのセクションに書かれているでしょう。見本をスクロールして、そのセクションをクリック（スマホではタップ）してください。',
+          correct: '「営業時間・アクセス」のセクションに、住所が書かれていました。見出しを手がかりにすると、探しやすいですね。',
+          wrong: 'そこは「{name}」のセクションです。見出しを手がかりに、住所が書かれていそうなセクションを探してみましょう。',
+          wrongOther: 'そこは「{name}」です。セクションは、見出しのついたまとまりです。下へスクロールして探してみましょう。',
+        },
+        tag: 'セクション {n}',
+      },
+      footer: {
+        name: 'フッター',
+        en: 'Footer',
+        lead: 'ページのいちばん下にある、横長の帯のこと。',
+        look: {
+          p1: '見本のいちばん下で、赤い線で囲んだところがフッターです。',
+          p2: 'このフッターには、次のものが入っています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'shopInfo', label: 'お店の情報', desc: '名前・住所・営業時間' },
+            { id: 'footerNav', label: 'フッターのリンク', desc: 'おもなページへの入り口' },
+            { id: 'copyright', label: 'コピーライト', desc: 'サイトの文章や絵の持ち主を示す一行' },
+          ],
+          p3: 'ページを最後まで読んだ人が、次にどこへ行くか迷わないように、ここにもリンクを置きます。お問い合わせやプライバシーポリシー（個人情報の扱い）へのリンクも、よくフッターに置かれます。',
+          tip: 'ヘッダーと同じく、フッターもほとんどのサイトで全ページ共通です。',
+        },
+        touch: {
+          p1: 'ほかのページのフッターも見てみましょう。ボタンを押すと、見本がそのページのいちばん下へ移動します。',
+          pages: { home: 'トップ', menu: 'メニュー', item: '商品', reserve: 'ご予約' },
+          shown: '「{page}」のページのいちばん下にも、同じフッターがあります。',
+          moved: 'フッターのリンクから「{name}」へ移動しました。ページを最後まで読んだ人も、ここから次へ進めます。',
+        },
+        check: {
+          q: '見本の中で、フッターだと思う場所をクリック（スマホではタップ）してください。見本をスクロールして探しましょう。',
+          correct: 'ページのいちばん下の帯がフッターです。',
+          correctSub: 'そこはフッターの中の「{name}」でした。{name}も、フッターの一部です。',
+          wrong: 'そこは「{name}」です。フッターは、ページのいちばん下にあります。',
+        },
+      },
       fv: {
         name: 'ファーストビュー',
         en: 'Above the Fold',
@@ -880,8 +994,65 @@ const TEXT = {
         },
         fold: 'ここまでがファーストビュー',
       },
-      stickyHeader: { name: '固定ヘッダー', en: 'Sticky Header' },
-      breadcrumb: { name: 'パンくずリスト', en: 'Breadcrumbs' },
+      stickyHeader: {
+        name: '固定ヘッダー',
+        en: 'Sticky Header',
+        lead: 'スクロールしても、画面の上にくっついたまま付いてくるヘッダーのこと。',
+        look: {
+          p1: '見本を下へスクロールしてみましょう。赤い線で囲んだヘッダーが、画面の上にくっついたまま付いてきます。これが固定ヘッダーです。',
+          p2: 'ふつうのヘッダーは、スクロールするとページといっしょに上へ流れて、見えなくなります。',
+          p3: 'どこまで読み進めても、ナビゲーションや予約へすぐ移動できます。そのかわり、画面の一部をいつも使うので、スマホでは高さを低くするなどの工夫をします。',
+          tip: '「追従ヘッダー」と呼ぶこともあります。英語では "sticky header" や "fixed header" と言います。',
+        },
+        down: '見本を下へスクロールする',
+        up: 'いちばん上へ戻る',
+        touch: {
+          p1: 'スイッチで固定をやめてから、見本をスクロールしてみましょう。固定ヘッダーと見比べます。',
+          switch: '固定をやめる',
+          on: 'いまは固定ヘッダーです。どこまでスクロールしても、ヘッダーが画面の上に残ります。',
+          off: 'ヘッダーが上へ流れて、見えなくなりました。ほかのページへ行くには、いちばん上まで戻らなければなりません。',
+        },
+        check: {
+          q: 'ヘッダーを固定すると、どんなよいことがあるでしょう。',
+          options: [
+            'ページの表示が速くなる',
+            'どこまでスクロールしても、ナビゲーションを使える',
+            '中身を見られる広さが増える',
+          ],
+          correct: '固定ヘッダーなら、ページのどこにいても、ナビゲーションや予約へすぐ移動できます。',
+          wrongA: '表示の速さは変わりません。ヘッダーの見え方が変わるだけです。',
+          wrongC: '反対です。ヘッダーがいつも画面の上に残るので、そのぶん中身を見られる広さは少し減ります。',
+        },
+      },
+      breadcrumb: {
+        name: 'パンくずリスト',
+        en: 'Breadcrumbs',
+        lead: 'いまのページが、サイトの中のどこにあるかを示す道すじのこと。',
+        look: {
+          p1: '見本の商品のページで、赤い線で囲んだところがパンくずリストです。',
+          p2: '左から順に、サイトの入り口からいまのページまでの道すじを示しています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'home', label: 'ホーム', desc: 'サイトの入り口（トップページ）' },
+            { id: 'menu', label: 'メニュー', desc: '1つ上の階層。商品が並んだ一覧のページ' },
+            { id: 'current', label: 'ひだまりブレンド', desc: 'いまいるページ。リンクにはなっていない' },
+          ],
+          p3: 'パンくずリストを見れば、いまサイトのどこにいるかがわかり、上の階層へもすぐ戻れます。見本の上の URL も、同じ順番の道すじになっています。',
+          tip: '童話「ヘンゼルとグレーテル」で、帰り道がわかるようにパンくずを落としていったことから名付けられました。',
+        },
+        touch: {
+          p1: 'パンくずリストの「メニュー」や「ホーム」を押して、移動してみましょう。メニューのページでカードを押すと、また商品のページへ進めます。',
+          toMenu: '1つ上の階層の「メニュー」へ戻りました。パンくずリストが「ホーム › メニュー」と短くなっています。カードを押すと、商品のページへ進めます。',
+          toHome: 'いちばん上の「ホーム」へ戻りました。トップページには、パンくずリストはありません。',
+          toItem: '「{name}」のページへ進みました。パンくずリストの最後が「{name}」に変わっています。',
+          back: '商品のページへ戻る',
+        },
+        check: {
+          q: '見本は「ひだまりブレンド」の商品のページです。パンくずリストを使って、メニューの一覧のページへ戻ってください。',
+          correct: 'パンくずリストの「メニュー」で、1つ上の階層へ戻れました。',
+          home: '「ホーム」は、いちばん上のトップページです。メニューの一覧は、その1つ下の階層にあります。',
+          other: '「{name}」から移動しました。今回は、ページの上のほうにあるパンくずリストを使ってみましょう。',
+        },
+      },
 
       /* ===== 2章 並べ方 ===== */
       space: {
@@ -1242,6 +1413,9 @@ const TEXT = {
         ],
       },
       footer: {
+        address: 'ひだまり町1-2-3（ひだまり駅から歩いて3分）',
+        hours: '7:00〜18:00 ／ 水曜日休み',
+        links: 'フッターのリンク',
         copy: '© ひだまり珈琲店',
         note: 'このお店は、Web Terms の練習用につくった架空のお店です。',
       },
@@ -1290,6 +1464,9 @@ const state = {
   event: null,      // 触る：見本で起きたこと（パネルに表示する）
   hidden: false,    // ヘッダー：隠しているか
   ctaWeak: false,   // CTA：目立たなくしているか
+  heroOff: false,   // ヒーロー：外しているか
+  flat: false,      // セクション：見出しと区切りをなくしているか
+  unstick: false,   // 固定ヘッダー：固定をやめているか
   vpH: null,        // ファーストビュー：見本の画面の高さ（null ならふつう）
   vpMax: 0,
   space: DEFAULT.space,
@@ -1308,7 +1485,7 @@ const site = $('#site');
 const vp = $('#viewport');
 const overlay = $('#overlay');
 const panel = $('#panel');
-const part = (name) => site.querySelector(`[data-page]:not([hidden]) [data-part="${name}"], .s-header [data-part="${name}"], .s-layer [data-part="${name}"], [data-part="${name}"]:is(.s-header, .s-footer)`);
+const part = (name) => site.querySelector(`[data-page]:not([hidden]) [data-part="${name}"], .s-header [data-part="${name}"], .s-layer [data-part="${name}"], .s-footer [data-part="${name}"], [data-part="${name}"]:is(.s-header, .s-footer)`);
 const T = (k, v) => t(`terms.${state.term}.${k}`, v);
 const L = () => LESSONS[state.term];
 const isQuiz = () => state.step === 'check' && !!L()?.check.inSample;
@@ -1346,6 +1523,7 @@ function buildSite() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
   $('#s-burger').setAttribute('aria-label', t('site.burger'));
+  $('.s-foot-nav').setAttribute('aria-label', t('site.footer.links'));
 
   $('#s-menu').replaceChildren(...t('site.menu.items').flatMap((m) => [
     h('dt', { class: 'row' }, m.name, h('span', { class: 'price' }, m.price)),
@@ -1440,6 +1618,7 @@ function setPage(page, { keepScroll = false } = {}) {
   $('#url').textContent = t('site.host') + PATHS[page].replace('{id}', state.item);
   if (page === 'menu') setTab(state.tab);
   if (page === 'item') buildItem();
+  buildCrumbs();
   if (!keepScroll) vp.scrollTop = 0;
 }
 function go(target) {
@@ -1460,16 +1639,27 @@ function setTab(id, fromUser = false) {
   draw();
 }
 
+/* パンくずリスト（トップ以外のページ） */
+function buildCrumbs() {
+  const I = (k) => t(`site.item.${k}`);
+  const link = (target, label) => h('a', { href: '#', 'data-go': target }, label);
+  const trails = {
+    menu: [link('home', I('home')), I('menu')],
+    item: [link('home', I('home')), link('menu', I('menu')), itemData().name],
+    reserve: [link('home', I('home')), t('site.reserve.title')],
+  };
+  site.querySelectorAll('[data-crumbs]').forEach((nav) => {
+    const trail = trails[nav.dataset.crumbs];
+    nav.setAttribute('aria-label', t('parts.breadcrumb'));
+    nav.replaceChildren(h('ol', {}, trail.map((c, i) => h('li', i === trail.length - 1 ? { 'aria-current': 'page' } : {}, c))));
+  });
+}
+
 function itemData() { return t('site.items').find((x) => x.id === state.item); }
 function buildItem() {
   const it = itemData();
   const I = (k) => t(`site.item.${k}`);
   const kind = it.cat === 'food' ? 'food' : it.cat === 'cake' ? 'cake' : 'drink';
-  $('#s-crumbs').setAttribute('aria-label', t('parts.breadcrumb'));
-  $('#s-crumbs').replaceChildren(h('ol', {},
-    h('li', {}, h('a', { href: '#', 'data-go': 'home' }, I('home'))),
-    h('li', {}, h('a', { href: '#', 'data-go': 'menu' }, I('menu'))),
-    h('li', { 'aria-current': 'page' }, it.name)));
   $('#s-item').replaceChildren(
     h('div', {},
       h('button', { type: 'button', class: 's-photo', 'data-part': 'photo', 'aria-label': I('zoom'), html: art(kind, it.color),
@@ -1563,6 +1753,9 @@ function applySite() {
   site.style.setProperty('--sp', state.space);
   site.style.setProperty('--lh', state.lh);
   site.classList.toggle('cta-weak', state.ctaWeak);
+  $('.s-hero').hidden = state.heroOff;
+  site.classList.toggle('flat', state.flat);
+  site.classList.toggle('sticky', state.term === 'stickyHeader' && !state.unstick);
   site.classList.toggle('compact', !!lesson.compact);
   site.querySelector('[data-part="info"]').classList.toggle('cramped', state.term === 'space' && state.step === 'check');
   // 見本の画面の大きさ（ファーストビューの高さ、ドロワーのスマホ幅）
@@ -1583,6 +1776,9 @@ function applySite() {
 function resetSample() {
   state.hidden = false;
   state.ctaWeak = false;
+  state.heroOff = false;
+  state.flat = false;
+  state.unstick = false;
   state.vpH = null;
   state.space = DEFAULT.space;
   state.lh = DEFAULT.lh;
@@ -1753,6 +1949,21 @@ function rules() {
   return out;
 }
 
+/* トップページのセクションを、ひとつずつ囲んで番号の札をつける */
+function sectionBoxes() {
+  return [...site.querySelectorAll('[data-page="home"] .s-section')].flatMap((sec, i) => {
+    const b = boxOf(sec);
+    const label = t('terms.section.tag', { n: i + 1 });
+    const tagW = label.length * 12 + 18;
+    const tx = b.x + b.w - 8 - tagW;
+    return [
+      svg('rect', { x: b.x + 4, y: b.y + 4, width: Math.max(0, b.w - 8), height: Math.max(0, b.h - 8), fill: 'none', stroke: PEN, 'stroke-width': 2, rx: 2 }),
+      svg('rect', { x: tx, y: b.y + 4, width: tagW, height: 22, fill: PEN, rx: 2 }),
+      svg('text', { x: tx + tagW / 2, y: b.y + 15, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'tag' }, label),
+    ];
+  });
+}
+
 /* ============================================================
    用語ごとの中身
    - page / focus：見本のどのページの、どこを見せるか
@@ -1765,6 +1976,13 @@ const sampleMarks = (target) => (a) => (a.correct
   ? circle(part(target), t('app.ok'))
   : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]);
 const eventLine = () => (state.event ? h('p', { class: 'event' }, state.event) : null);
+/* 見本の中の部品をクリックして答える問題（その部品の中を押しても正解。中の部品なら名前も伝える） */
+const insideJudge = (target) => (el) => {
+  const name = el.dataset.part;
+  if (el.closest(`[data-part="${target}"]`)) return { correct: true, msg: name === target ? 'correct' : 'correctSub', name };
+  return { correct: false, msg: 'wrong', name };
+};
+const quietBtn = (label, onClick) => h('button', { type: 'button', class: 'btn quiet', on: { click: onClick } }, label);
 
 const LESSONS = {
   header: {
@@ -1824,6 +2042,78 @@ const LESSONS = {
       },
       marks: sampleMarks('nav'),
     },
+  },
+
+  hero: {
+    hoverNames: true,
+    main: () => part('hero'),
+    items: Object.fromEntries(['catch', 'heroText', 'cta', 'visual'].map((id) => [id, () => part(id)])),
+    lookMarks: () => annotate(part('hero'), t('parts.hero')),
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        toggle(T('touch.switch'), state.heroOff, (v) => { state.heroOff = v; }),
+        state.heroOff ? h('p', {}, T('touch.after')) : null,
+      ];
+    },
+    touchMarks: () => annotate(part('hero'), t('parts.hero')),
+    check: { inSample: true, judge: insideJudge('hero'), marks: sampleMarks('hero') },
+  },
+
+  section: {
+    focus: 'carousel',
+    items: { heading: () => $('[data-part="menu"] h2'), content: () => $('#s-menu') },
+    lookMarks: () => sectionBoxes(),
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        toggle(T('touch.switch'), state.flat, (v) => { state.flat = v; }),
+        state.flat ? h('p', {}, T('touch.after')) : null,
+      ];
+    },
+    touchMarks: () => (state.flat ? [] : sectionBoxes()),
+    check: {
+      inSample: true,
+      judge(el) {
+        const sec = el.closest('.s-section');
+        if (!sec) return { correct: false, msg: 'wrongOther', name: el.dataset.part };
+        const ok = sec.dataset.part === 'info';
+        // セクションは見出しの言葉で呼ぶ（「カルーセル」ではなく「季節のおすすめ」）
+        return { correct: ok, msg: ok ? 'correct' : 'wrong', name: sec.dataset.part, label: $('h2', sec).textContent };
+      },
+      marks: (a) => (a.correct
+        ? circle(part('info'), t('app.ok'))
+        : [...annotate(a.el.closest('.s-section') || a.el, a.vars.name, { dashed: true }), ...cross(a.x, a.y)]),
+    },
+  },
+
+  footer: {
+    focus: 'footer',
+    hoverNames: true,
+    main: () => part('footer'),
+    items: Object.fromEntries(['shopInfo', 'footerNav', 'copyright'].map((id) => [id, () => part(id)])),
+    lookMarks: () => annotate(part('footer'), t('parts.footer')),
+    allowNav: (link) => state.step === 'touch' && !!link.closest('.s-footer'),
+    on: {
+      go({ label }) { state.event = T('touch.moved', { name: label }); renderPanel(); },
+    },
+    touch() {
+      // ボタンで、それぞれのページのいちばん下へ移動する
+      const show = (id, label) => {
+        setPage(id);
+        vp.scrollTop = vp.scrollHeight;
+        state.event = T('touch.shown', { page: label });
+        renderPanel();
+        draw();
+      };
+      return [
+        h('p', {}, T('touch.p1')),
+        h('div', { class: 'actions' }, Object.entries(T('touch.pages')).map(([id, label]) => quietBtn(label, () => show(id, label)))),
+        eventLine(),
+      ];
+    },
+    touchMarks: () => annotate(part('footer'), t('parts.footer')),
+    check: { inSample: true, judge: insideJudge('footer'), marks: sampleMarks('footer') },
   },
 
   fv: {
@@ -1910,8 +2200,65 @@ const LESSONS = {
     touchMarks: () => rules(),
     check: {
       choices: [1.1, 3.0, 1.8],
+      choice: (lh) => h('span', { class: 'sample', style: `line-height:${lh}` }, T('check.sample')),
       answers: ['wrongA', 'wrongB', 'correct'],
     },
+  },
+
+  stickyHeader: {
+    main: () => part('header'),
+    lookMarks: () => annotate(part('header'), t('parts.header')),
+    lookExtra: () => scrollButtons(),
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        toggle(T('touch.switch'), state.unstick, (v) => { state.unstick = v; }),
+        h('p', {}, T(state.unstick ? 'touch.off' : 'touch.on')),
+        scrollButtons(),
+      ];
+    },
+    touchMarks: () => annotate(part('header'), t('parts.header')),
+    check: {
+      choices: [0, 1, 2],
+      choice: (i) => h('span', { class: 'sample' }, T('check.options')[i]),
+      answers: ['wrongA', 'correct', 'wrongC'],
+    },
+  },
+
+  breadcrumb: {
+    page: 'item',
+    hoverNames: true,
+    main: () => part('breadcrumb'),
+    items: Object.fromEntries(['home', 'menu', 'current'].map((id, i) => [id, () => part('breadcrumb').querySelectorAll('li')[i]])),
+    lookMarks: () => annotate(part('breadcrumb'), t('parts.breadcrumb')),
+    allowNav: (link) => (state.step === 'touch' && !!link.closest('.s-crumbs, .s-card'))
+      || (state.step === 'check' && !!link.closest('.s-crumbs, .s-header, .s-item')),
+    on: {
+      go({ target, label, from }) {
+        if (state.step === 'touch') {
+          state.event = target === 'menu' ? T('touch.toMenu') : target === 'home' ? T('touch.toHome') : T('touch.toItem', { name: label });
+          renderPanel();
+        }
+        if (state.step === 'check') {
+          if (from === 'crumbs' && target === 'menu') setAnswer(true, 'correct');
+          else if (from === 'crumbs') setAnswer(false, 'home');
+          else setAnswer(false, 'other', { name: label });
+        }
+      },
+    },
+    touch: () => [
+      h('p', {}, T('touch.p1')),
+      eventLine(),
+      state.page !== 'item' ? h('div', { class: 'actions' }, quietBtn(T('touch.back'), () => {
+        go(`item:${state.item}`);
+        state.event = null;
+        renderPanel();
+        draw();
+      })) : null,
+    ],
+    touchMarks: () => annotate(part('breadcrumb'), t('parts.breadcrumb')),
+    // 正解なら、移った先のパンくずリストの最後（いまいる「メニュー」）を丸で囲む
+    check: { marks: (a) => (a.correct ? circle(part('breadcrumb')?.querySelector('[aria-current]'), t('app.ok')) : []) },
   },
 
   /* ===== 3章 部品 ===== */
@@ -2055,6 +2402,13 @@ const LESSONS = {
   },
 };
 
+/* 見本を下までスクロールする／上へ戻るボタン（固定ヘッダー） */
+function scrollButtons() {
+  return h('div', { class: 'actions' },
+    quietBtn(T('down'), () => vp.scrollTo({ top: vp.scrollHeight, behavior: 'smooth' })),
+    quietBtn(T('up'), () => vp.scrollTo({ top: 0, behavior: 'smooth' })));
+}
+
 /* スイッチ */
 function toggle(label, checked, set) {
   return h('label', { class: 'switch' },
@@ -2159,6 +2513,7 @@ function renderPanel() {
         }, h('b', {}, it.label), h('span', {}, it.desc))))) : null,
       h('p', {}, T('look.p3', vars)),
       h('p', { class: 'sub' }, T('look.tip', vars)),
+      lesson.lookExtra?.(),
       nextBtn,
     ];
   } else if (state.step === 'touch') {
@@ -2182,11 +2537,11 @@ function renderCheck(lesson) {
   const out = [h('p', {}, T('check.q'))];
   if (lesson.check.inSample) out.push(h('p', { class: 'sub' }, t('app.keys')));
   if (lesson.check.choices) {
-    out.push(h('div', { class: 'choices' }, lesson.check.choices.map((lh, i) => h('button', {
+    out.push(h('div', { class: 'choices' }, lesson.check.choices.map((c, i) => h('button', {
       type: 'button',
       'aria-pressed': String(!!a && a.choice === i),
       on: { click: () => choose(i) },
-    }, h('span', { class: 'key' }, 'ABC'[i]), h('span', { class: 'sample', style: `line-height:${lh}` }, T('check.sample'))))));
+    }, h('span', { class: 'key' }, 'ABC'[i]), lesson.check.choice(c)))));
   }
   if (a) {
     out.push(h('div', { class: 'feedback' },
@@ -2267,10 +2622,10 @@ function answer(target, x, y) {
   const el = target.closest('[data-part]');
   if (!el) return;
   const r = L().check.judge(el, x, y);
-  setAnswer(r.correct, r.msg, { name: t(`parts.${r.name}`) }, { el, name: r.name, x, y });
+  setAnswer(r.correct, r.msg, { name: r.label ?? t(`parts.${r.name}`) }, { el, name: r.name, x, y });
 }
 function choose(i) {
-  const c = LESSONS.lineHeight.check;
+  const c = L().check;
   setAnswer(c.answers[i] === 'correct', c.answers[i], undefined, { choice: i });
 }
 
@@ -2330,10 +2685,12 @@ site.addEventListener('click', (e) => {
     const lesson = L();
     if (link.dataset.go && lesson.allowNav?.(link)) {
       const target = link.dataset.go;
-      const label = link.textContent;
+      const label = link.querySelector('.name')?.firstChild.textContent ?? link.textContent;  // カードは商品名だけ
+      // どこのリンクから移動したか（移動するとパンくずリストは作り直されるので、先に調べる）
+      const from = ['crumbs', 'nav', 'drawer', 'footer', 'card', 'logo'].find((k) => link.closest(`.s-${k}`)) || 'other';
       if (state.layer) { state.navigating = true; closeLayer('nav'); state.navigating = false; }
       go(target);
-      notify('go', { target, label });
+      notify('go', { target, label, from });
       draw();
       return;
     }
