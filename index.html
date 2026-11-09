@@ -1696,7 +1696,7 @@ const TEXT = {
           off: '画像も説明もなく、URL だけになりました。どんなページか、開くまでわかりません。',
           long: '長すぎる部分は、途中で切れて「…」になります。大事なことは、はじめのほうに書きます。',
           code: 'ページに書く内容',
-          noCode: '<!-- OGP を書いていない -->',
+          noCode: '\u003c!-- OGP を書いていない -->',
         },
         check: {
           q: 'OGP を設定すると、何が変わるでしょう。',
@@ -2085,9 +2085,10 @@ function renderOgp() {
   $('#s-ogp-desc').hidden = !state.ogDesc.trim();
 }
 const ogCode = () => (state.ogOff ? t('terms.ogp.touch.noCode') : [
-  `<meta property="og:title" content="${state.ogTitle}">`,
-  `<meta property="og:description" content="${state.ogDesc}">`,
-  `<meta property="og:image" content="https://${t('site.host')}ogp.png">`,
+  // 「<」は \u003c と書く（ページに本物の OGP があると、SNS が読みまちがえないように）
+  `\u003cmeta property="og:title" content="${state.ogTitle}">`,
+  `\u003cmeta property="og:description" content="${state.ogDesc}">`,
+  `\u003cmeta property="og:image" content="https://${t('site.host')}ogp.png">`,
 ].join('\n'));
 
 /* ---- ファビコン：ブラウザのタブとブックマーク（見本の枠の外側） ---- */
