@@ -46,43 +46,34 @@ body {
 button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
 
-/* ---- 上の帯：アプリ名と5語の進み具合 ---- */
+/* ---- 上の帯：アプリ名・用語一覧・前へ／次へ ---- */
 .bar {
   height: var(--bar);
   display: flex;
   align-items: center;
-  gap: 32px;
-  padding: 0 24px;
+  gap: 16px;
+  padding: 0 20px 0 24px;
   border-bottom: 1px solid var(--line);
 }
 .brand { font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
 .brand small { font-weight: 400; color: var(--ink-2); margin-left: 8px; font-size: 12px; }
-.bar nav { min-width: 0; }
-.terms {
-  display: flex;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.terms button {
-  display: flex;
+.bar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.bar .progress { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-right: 8px; white-space: nowrap; }
+.bar-btn {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: var(--bar);
+  height: 36px;
   padding: 0 12px;
-  border: 0;
-  border-bottom: 2px solid transparent;
+  border: 1px solid var(--line);
+  border-radius: 4px;
   background: none;
   white-space: nowrap;
   cursor: pointer;
-  color: var(--ink-2);
 }
-.terms .num { font-family: var(--mono); font-size: 12px; }
-.terms button[aria-current="step"] { color: var(--ink); border-bottom-color: var(--pen); font-weight: 600; }
-@media (hover: hover) { .terms button:hover { color: var(--ink); } }
+.bar-btn:disabled { opacity: .4; cursor: default; }
+.bar-btn svg { flex: none; }
+@media (hover: hover) { .bar-btn:not(:disabled):hover { background: var(--paper-2); } }
 .stamp {
   display: inline-grid;
   place-items: center;
@@ -94,6 +85,59 @@ button { font: inherit; color: inherit; }
   font-weight: 700;
   line-height: 1;
 }
+
+/* ---- 用語一覧（ドロワー） ---- */
+dialog.list {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--line);
+  width: min(360px, 90vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+}
+dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
+@media (prefers-reduced-motion: no-preference) {
+  dialog.list[open] { animation: slide-in .2s ease-out; }
+  @keyframes slide-in { from { transform: translateX(-100%); } }
+}
+.list-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--bar);
+  padding: 0 16px 0 20px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+.list-head h2 { font-size: 16px; margin: 0; }
+.list-head .progress { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.list-head .bar-btn { margin-left: auto; }
+.list-body { padding: 4px 14px 40px; }
+.list-body h3 { font-size: 13px; color: var(--ink-2); margin: 22px 6px 6px; font-weight: 600; }
+.list-body ol { list-style: none; margin: 0; padding: 0; }
+.list-body button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 2.2em 1fr auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.list-body .num { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+.list-body button[aria-current="page"] .name { color: var(--pen); font-weight: 700; }
+.list-body button:disabled { cursor: default; color: var(--ink-2); }
+.list-body .soon { font-size: 11px; color: var(--ink-2); }
+@media (hover: hover) { .list-body button:not(:disabled):hover { background: var(--paper-2); } }
 
 /* ---- 2列：左が見本（主役）、右が説明 ---- */
 .layout {
@@ -117,7 +161,7 @@ button { font: inherit; color: inherit; }
   border: 1px solid var(--line);
   border-radius: 6px;
   overflow: hidden;
-  background: var(--paper-2);   /* 画面を低くしたとき、残りは「画面の外」に見える */
+  background: var(--paper-2);   /* 画面を小さくしたとき、残りは「画面の外」に見える */
 }
 .browser-bar {
   display: flex;
@@ -130,10 +174,14 @@ button { font: inherit; color: inherit; }
   font-family: var(--mono);
   font-size: 12px;
   color: var(--ink-2);
+  overflow: hidden;
+  white-space: nowrap;
 }
-.browser-bar .dots { display: flex; gap: 5px; }
+.browser-bar .dots { display: flex; gap: 5px; flex: none; }
 .browser-bar .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.browser-bar .url { overflow: hidden; text-overflow: ellipsis; }
 .viewport { flex: 1; min-height: 0; overflow: auto; position: relative; background: #fff; }
+.viewport.locked { overflow: hidden; }
 
 /* ---- 右の説明パネル ---- */
 .count { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin: 0; }
@@ -166,7 +214,7 @@ button { font: inherit; color: inherit; }
 .parts button {
   width: 100%;
   display: grid;
-  grid-template-columns: 8em 1fr;
+  grid-template-columns: 8.5em 1fr;
   gap: 12px;
   padding: 10px 4px;
   border: 0;
@@ -224,6 +272,8 @@ button { font: inherit; color: inherit; }
 .feedback .label { font-weight: 700; margin-right: 6px; }
 .feedback .label.ok { color: var(--pen); }
 .feedback .label.ng { color: var(--ink-2); }
+.event { color: var(--ink); }
+.event b { color: var(--pen); margin-right: 6px; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .btn {
@@ -243,17 +293,19 @@ button { font: inherit; color: inherit; }
 
 /* ---- スマホ幅：見本が上、説明が下 ---- */
 @media (max-width: 900px) {
-  .bar { gap: 16px; padding: 0 0 0 16px; }
-  .brand small { display: none; }
+  .bar { gap: 10px; padding: 0 12px 0 16px; }
+  .brand small, .bar .progress { display: none; }
+  .bar-btn { padding: 0 10px; }
   .layout { display: block; height: auto; }
   /* 説明を読みながら見本を見られるよう、見本は画面の上に留める */
   .stage { padding: 12px; position: sticky; top: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--line); }
   .browser { height: 46dvh; }
   .panel { border-left: 0; padding: 20px 16px 48px; overflow: visible; }
 }
+@media (max-width: 380px) { .brand { display: none; } }
 
 /* 赤ペンの書き込み（見本の上に重ねる） */
-.overlay { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.overlay { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 10; }
 .overlay text {
   font-family: var(--sans);
   font-size: 13px;
@@ -280,6 +332,7 @@ button { font: inherit; color: inherit; }
   --c-sub: #74604f;
   --c-accent: #8a5226;
   --c-line: #e2d3bb;
+  --c-err: #a3341b;
   --c-serif: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
   position: relative;
   container-type: inline-size;
@@ -293,8 +346,10 @@ button { font: inherit; color: inherit; }
 .site [hidden] { display: none !important; }
 .site.quiz [data-part] { cursor: pointer; }
 .site a { color: inherit; text-decoration: none; }
+.site button { cursor: pointer; }
 .site .cramped { --sp: .12; }   /* 「余白」の確かめる用：わざと余白を詰めた場所 */
 
+/* ヘッダー */
 .s-header {
   display: flex;
   align-items: center;
@@ -306,10 +361,16 @@ button { font: inherit; color: inherit; }
   line-height: 1.6;
 }
 .s-logo { display: flex; align-items: center; gap: 10px; font-family: var(--c-serif); font-weight: 700; font-size: 19px; letter-spacing: .06em; }
-.s-nav ul { display: flex; gap: calc(24px * var(--sp)); margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.s-nav ul { display: flex; gap: calc(22px * var(--sp)); margin: 0; padding: 0; list-style: none; font-size: 14px; }
 .s-nav a { border-bottom: 1px solid transparent; padding-bottom: 2px; }
 .s-nav a:hover { border-bottom-color: var(--c-accent); }
+.s-burger { display: none; width: 40px; height: 40px; place-items: center; border: 1px solid var(--c-line); border-radius: 4px; background: none; padding: 0; }
+.s-burger span { display: block; width: 18px; height: 2px; background: var(--c-ink); box-shadow: 0 -6px 0 var(--c-ink), 0 6px 0 var(--c-ink); }
+.site.compact .s-nav { display: none; }
+.site.compact .s-burger { display: inline-grid; }
+.site.compact .s-header { flex-direction: row; align-items: center; }
 
+/* ヒーロー */
 .s-hero {
   display: grid;
   grid-template-columns: 1.15fr .85fr;
@@ -319,9 +380,13 @@ button { font: inherit; color: inherit; }
 }
 .s-hero h1 { font-family: var(--c-serif); font-size: 34px; line-height: 1.45; margin: 0 0 calc(16px * var(--sp)); letter-spacing: .04em; }
 .s-hero p { margin: 0 0 calc(28px * var(--sp)); color: var(--c-sub); }
-.s-btn { display: inline-block; padding: 11px 22px; background: var(--c-accent); color: #fbf6ec !important; border-radius: 3px; font-size: 14px; letter-spacing: .06em; line-height: 1.6; }
-.s-hero svg { width: 100%; max-width: 280px; justify-self: center; }
+.s-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; }
+.s-btn { display: inline-block; padding: 11px 22px; border: 0; background: var(--c-accent); color: #fbf6ec !important; border-radius: 3px; font: inherit; font-size: 14px; letter-spacing: .06em; line-height: 1.6; }
+.s-sublink { font-size: 14px; border-bottom: 1px solid currentColor; }
+.s-hero > svg { width: 100%; max-width: 280px; justify-self: center; }
+.site.cta-weak .s-btn[data-part="cta"] { background: none; color: var(--c-sub) !important; padding: 0; font-size: 13px; letter-spacing: 0; }
 
+/* セクション（トップページ） */
 .s-section { padding: calc(56px * var(--sp)) calc(32px * var(--sp)); border-top: 1px solid var(--c-line); }
 .s-section h2 { font-family: var(--c-serif); font-size: 22px; line-height: 1.5; margin: 0 0 calc(24px * var(--sp)); letter-spacing: .08em; }
 .s-menu { margin: 0; max-width: 560px; }
@@ -339,6 +404,117 @@ button { font: inherit; color: inherit; }
 .s-info dt { color: var(--c-sub); font-size: 14px; }
 .s-info dd { margin: 0; }
 
+/* カルーセル */
+.s-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border: 1px solid var(--c-line); border-radius: 4px; background: var(--c-paper); }
+.s-track::-webkit-scrollbar { display: none; }
+.s-slide { flex: 0 0 100%; scroll-snap-align: start; display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 24px; padding: 24px 28px; }
+.s-slide svg { width: 100%; }
+.s-slide h3 { font-family: var(--c-serif); font-size: 19px; margin: 0 0 6px; }
+.s-slide p { margin: 0; color: var(--c-sub); font-size: 14px; }
+.s-car-ctrl { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+.s-arrow { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--c-sub); border-radius: 50%; background: none; color: var(--c-ink); font-size: 18px; line-height: 1; padding: 0; }
+.s-dots { display: flex; gap: 8px; }
+.s-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--c-accent); background: none; padding: 0; }
+.s-dot[aria-current="true"] { background: var(--c-accent); }
+
+/* ページの見出し（トップ以外） */
+.s-pagehead { padding: calc(40px * var(--sp)) calc(32px * var(--sp)) calc(8px * var(--sp)); }
+.s-pagehead h1 { font-family: var(--c-serif); font-size: 28px; margin: 0 0 6px; letter-spacing: .06em; }
+.s-pagehead p { margin: 0; color: var(--c-sub); font-size: 14px; }
+
+/* タブ */
+.s-tabs { display: flex; margin: calc(16px * var(--sp)) calc(32px * var(--sp)) 0; border-bottom: 1px solid var(--c-line); }
+.s-tabs button { padding: 10px 18px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; color: var(--c-sub); font: inherit; font-size: 14px; }
+.s-tabs button[aria-selected="true"] { color: var(--c-ink); border-bottom-color: var(--c-accent); font-weight: 600; }
+
+/* カードのグリッド */
+.s-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: calc(20px * var(--sp)); padding: calc(24px * var(--sp)) calc(32px * var(--sp)) calc(56px * var(--sp)); }
+.s-card { display: block; background: var(--c-paper); border: 1px solid var(--c-line); border-radius: 4px; overflow: hidden; }
+.s-card:hover { border-color: var(--c-accent); }
+.s-card .art { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #efe2cb; }
+.s-card .art svg { width: 70%; }
+.s-card .body { padding: 12px 14px 14px; }
+.s-card .name { font-weight: 600; }
+.s-card .name span { display: block; font-family: var(--c-serif); font-weight: 400; font-size: 14px; }
+.s-card p { margin: 4px 0 0; font-size: 13px; color: var(--c-sub); line-height: 1.7; word-break: normal; }   /* 幅がせまいので、文節ではなくふつうに折り返す */
+
+/* 商品のページ */
+.s-crumbs { padding: calc(20px * var(--sp)) calc(32px * var(--sp)) 0; font-size: 13px; color: var(--c-sub); }
+.s-crumbs ol { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.s-crumbs li + li::before { content: "›"; margin-right: 8px; }
+.s-crumbs a { border-bottom: 1px solid currentColor; }
+.s-item { display: grid; grid-template-columns: 1fr 1fr; gap: calc(32px * var(--sp)); align-items: start; padding: calc(24px * var(--sp)) calc(32px * var(--sp)) calc(56px * var(--sp)); }
+.s-photo { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; border: 0; border-radius: 4px; background: #efe2cb; padding: 0; cursor: zoom-in !important; }
+.s-photo svg { width: 65%; }
+.s-photo-note { font-size: 12px; color: var(--c-sub); margin: 6px 0 0; }
+.s-item h1 { font-family: var(--c-serif); font-size: 26px; margin: 0 0 4px; }
+.s-item .price { font-family: var(--c-serif); font-size: 18px; margin: 0 0 16px; }
+.s-item p { margin: 0 0 20px; }
+
+/* 予約フォーム */
+.s-form { display: grid; gap: calc(18px * var(--sp)); max-width: 520px; }
+.s-field > label, .s-field > .legend { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.s-req { color: var(--c-err); font-size: 12px; font-weight: 400; margin-left: 6px; }
+.s-form input[type="text"], .s-form input[type="date"], .s-form select, .s-form textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #cdb99a;
+  border-radius: 3px;
+  background: #fffdf8;
+  color: var(--c-ink);
+  font: inherit;
+}
+.s-form textarea { min-height: 5em; resize: vertical; }
+.s-form :focus-visible { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+.s-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.s-radios { display: flex; gap: 22px; }
+.s-radios label { display: flex; align-items: center; gap: 6px; }
+.s-radios input { accent-color: var(--c-accent); }
+.s-field.err input { border-color: var(--c-err); }
+.s-err { color: var(--c-err); font-size: 13px; margin: 4px 0 0; }
+.s-done { padding: 20px 22px; border: 1px solid var(--c-accent); border-radius: 4px; background: var(--c-paper); max-width: 520px; }
+.s-done p { margin: 0 0 10px; }
+.s-done .note { color: var(--c-sub); font-size: 14px; }
+
+/* よくある質問（アコーディオン） */
+.s-faq { max-width: 560px; border-top: 1px solid var(--c-line); }
+.s-faq details { border-bottom: 1px solid var(--c-line); }
+.s-faq summary { display: flex; justify-content: space-between; gap: 16px; padding: 14px 2px; font-weight: 600; cursor: pointer; list-style: none; }
+.s-faq summary::-webkit-details-marker { display: none; }
+.s-faq summary::after { content: "＋"; color: var(--c-accent); font-weight: 400; }
+.s-faq details[open] summary::after { content: "－"; }
+.s-faq p { margin: 0 0 16px; padding: 0 2px; color: var(--c-sub); }
+
+/* モーダルとドロワー（見本の画面の上に重なる層） */
+.s-layer { position: absolute; left: 0; right: 0; z-index: 5; overflow: hidden; }
+.s-backdrop { position: absolute; inset: 0; background: rgba(40, 28, 20, .55); }
+.s-modal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100% - 40px));
+  padding: 18px 18px 20px;
+  border-radius: 6px;
+  background: var(--c-paper);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .28);   /* 後ろのページから浮いて見せる */
+}
+.s-modal .art { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #efe2cb; border-radius: 4px; }
+.s-modal .art svg { width: 70%; }
+.s-modal p { margin: 10px 0 0; font-family: var(--c-serif); font-size: 17px; }
+.s-close { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--c-paper); color: var(--c-ink); padding: 0; }
+.s-drawer {
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: min(280px, 82%);
+  padding: 12px 20px;
+  background: var(--c-paper);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, .2);
+}
+.s-drawer .s-close { position: static; margin-left: auto; }
+.s-drawer ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.s-drawer a { display: block; padding: 14px 2px; border-bottom: 1px solid var(--c-line); font-size: 15px; }
+
 .s-footer { padding: calc(28px * var(--sp)) calc(32px * var(--sp)); background: #3b2a1f; color: #e9dcc6; font-size: 13px; }
 .s-footer p { margin: 0; }
 .s-footer p + p { margin-top: 4px; color: #bfae95; }
@@ -346,12 +522,21 @@ button { font: inherit; color: inherit; }
 /* 見本サイト自身のレスポンシブ（見本の枠の幅で切り替わる） */
 @container (max-width: 620px) {
   .s-header { flex-direction: column; align-items: flex-start; padding: calc(14px * var(--sp)) calc(20px * var(--sp)); gap: 8px; }
-  .s-nav ul { gap: calc(16px * var(--sp)); flex-wrap: wrap; }
+  .s-nav ul { gap: 6px calc(16px * var(--sp)); flex-wrap: wrap; }
   .s-hero { grid-template-columns: 1fr; padding: calc(36px * var(--sp)) calc(20px * var(--sp)) calc(44px * var(--sp)); gap: calc(20px * var(--sp)); }
   .s-hero h1 { font-size: 26px; }
-  .s-hero svg { max-width: 140px; justify-self: start; grid-row: 1; }
+  .s-hero > svg { max-width: 140px; justify-self: start; grid-row: 1; }
   .s-section { padding: calc(40px * var(--sp)) calc(20px * var(--sp)); }
   .s-news li { grid-template-columns: 1fr; gap: 0; }
+  .s-slide { grid-template-columns: 90px 1fr; gap: 16px; padding: 18px; }
+  .s-pagehead { padding: calc(28px * var(--sp)) calc(20px * var(--sp)) calc(6px * var(--sp)); }
+  .s-tabs { margin: calc(12px * var(--sp)) calc(20px * var(--sp)) 0; }
+  .s-tabs button { padding: 10px 12px; }
+  .s-grid { grid-template-columns: 1fr 1fr; gap: calc(12px * var(--sp)); padding: calc(20px * var(--sp)) calc(20px * var(--sp)) calc(40px * var(--sp)); }
+  .s-card p { display: none; }
+  .s-crumbs { padding: calc(16px * var(--sp)) calc(20px * var(--sp)) 0; }
+  .s-item { grid-template-columns: 1fr; padding: calc(18px * var(--sp)) calc(20px * var(--sp)) calc(40px * var(--sp)); }
+  .s-row2 { grid-template-columns: 1fr; }
   .s-footer { padding: calc(24px * var(--sp)) calc(20px * var(--sp)); }
 }
 </style>
@@ -360,11 +545,25 @@ button { font: inherit; color: inherit; }
 
 <header class="bar">
   <div class="brand"><span data-t="app.name"></span><small data-t="app.note"></small></div>
-  <nav aria-labelledby="terms-label">
-    <span id="terms-label" hidden data-t="app.termsLabel"></span>
-    <ol class="terms" id="terms"></ol>
-  </nav>
+  <button type="button" class="bar-btn" id="open-list" aria-haspopup="dialog">
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+    <span data-t="app.list"></span>
+  </button>
+  <div class="bar-right">
+    <span class="progress" id="bar-progress"></span>
+    <button type="button" class="bar-btn" id="prev" data-t="app.prev"></button>
+    <button type="button" class="bar-btn" id="next" data-t="app.next"></button>
+  </div>
 </header>
+
+<dialog class="list" id="list" aria-labelledby="list-title">
+  <div class="list-head">
+    <h2 id="list-title" data-t="app.list"></h2>
+    <span class="progress" id="list-progress"></span>
+    <button type="button" class="bar-btn" id="close-list" data-t="app.close"></button>
+  </div>
+  <div class="list-body" id="list-body"></div>
+</dialog>
 
 <div class="layout">
   <section class="stage" aria-labelledby="stage-label">
@@ -372,14 +571,14 @@ button { font: inherit; color: inherit; }
     <div class="browser">
       <div class="browser-bar" aria-hidden="true">
         <span class="dots"><i></i><i></i><i></i></span>
-        <span data-t="site.url"></span>
+        <span class="url" id="url"></span>
       </div>
       <div class="viewport" id="viewport">
 
         <!-- ここから見本のサイト -->
         <div class="site" id="site">
           <header class="s-header" data-part="header">
-            <a href="#" class="s-logo" data-part="logo">
+            <a href="#" class="s-logo" data-part="logo" data-go="home">
               <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
                 <circle cx="14" cy="14" r="13" fill="#f1dcb4"/>
                 <path d="M8 13h10v3a5 5 0 0 1-10 0z" fill="#8a5226"/>
@@ -390,53 +589,111 @@ button { font: inherit; color: inherit; }
             <nav class="s-nav" data-part="nav">
               <ul>
                 <li><a href="#" data-go="menu" data-t="site.nav.menu"></a></li>
-                <li><a href="#" data-go="about" data-t="site.nav.about"></a></li>
-                <li><a href="#" data-go="info" data-t="site.nav.access"></a></li>
-                <li><a href="#" data-go="news" data-t="site.nav.news"></a></li>
+                <li><a href="#" data-go="home#about" data-t="site.nav.about"></a></li>
+                <li><a href="#" data-go="home#info" data-t="site.nav.access"></a></li>
+                <li><a href="#" data-go="home#news" data-t="site.nav.news"></a></li>
+                <li><a href="#" data-go="reserve" data-t="site.nav.reserve"></a></li>
               </ul>
             </nav>
+            <button type="button" class="s-burger" data-part="burger" id="s-burger" aria-controls="s-layer"><span></span></button>
           </header>
 
-          <section class="s-hero" data-part="hero">
-            <div>
-              <h1 data-t="site.hero.title"></h1>
-              <p data-t="site.hero.body"></p>
-              <a href="#" class="s-btn" data-t="site.hero.button"></a>
+          <main>
+            <!-- トップページ -->
+            <div data-page="home">
+              <section class="s-hero" data-part="hero">
+                <div>
+                  <h1 data-t="site.hero.title"></h1>
+                  <p data-t="site.hero.body"></p>
+                  <div class="s-hero-actions">
+                    <a href="#" class="s-btn" data-part="cta" data-go="reserve" data-t="site.hero.button"></a>
+                    <a href="#" class="s-sublink" data-part="sublink" data-go="menu" data-t="site.hero.sub"></a>
+                  </div>
+                </div>
+                <svg viewBox="0 0 240 200" aria-hidden="true">
+                  <circle cx="150" cy="78" r="62" fill="#f1dcb4"/>
+                  <path d="M96 40c-8 10 8 16 0 28M118 34c-8 10 8 16 0 28M140 40c-8 10 8 16 0 28" fill="none" stroke="#b9a283" stroke-width="3" stroke-linecap="round"/>
+                  <ellipse cx="118" cy="170" rx="86" ry="14" fill="#e2d3bb"/>
+                  <path d="M62 86h112v34c0 30-25 52-56 52s-56-22-56-52z" fill="#fbf6ec" stroke="#3b2a1f" stroke-width="3"/>
+                  <path d="M174 98h10a18 18 0 0 1 0 36h-14" fill="none" stroke="#3b2a1f" stroke-width="3"/>
+                  <ellipse cx="118" cy="86" rx="56" ry="9" fill="#6b3d1c" stroke="#3b2a1f" stroke-width="3"/>
+                </svg>
+              </section>
+
+              <section class="s-section" data-part="carousel" aria-roledescription="carousel">
+                <h2 data-t="site.carousel.title"></h2>
+                <div class="s-track" id="s-track" data-part="slides"></div>
+                <div class="s-car-ctrl">
+                  <button type="button" class="s-arrow" data-part="arrows" id="s-prev">‹</button>
+                  <button type="button" class="s-arrow" data-part="arrows" id="s-next">›</button>
+                  <div class="s-dots" data-part="dots" id="s-dots"></div>
+                </div>
+              </section>
+
+              <section class="s-section" data-part="menu">
+                <h2 data-t="site.menu.title"></h2>
+                <dl class="s-menu" id="s-menu"></dl>
+              </section>
+
+              <section class="s-section s-about" data-part="about">
+                <h2 data-t="site.about.title"></h2>
+                <p id="s-about-text" data-t="site.about.body"></p>
+              </section>
+
+              <section class="s-section" data-part="info">
+                <h2 data-t="site.info.title"></h2>
+                <dl class="s-info" id="s-info"></dl>
+              </section>
+
+              <section class="s-section" data-part="news">
+                <h2 data-t="site.news.title"></h2>
+                <ul class="s-news" id="s-news"></ul>
+              </section>
             </div>
-            <svg viewBox="0 0 240 200" aria-hidden="true">
-              <circle cx="150" cy="78" r="62" fill="#f1dcb4"/>
-              <path d="M96 40c-8 10 8 16 0 28M118 34c-8 10 8 16 0 28M140 40c-8 10 8 16 0 28" fill="none" stroke="#b9a283" stroke-width="3" stroke-linecap="round"/>
-              <ellipse cx="118" cy="170" rx="86" ry="14" fill="#e2d3bb"/>
-              <path d="M62 86h112v34c0 30-25 52-56 52s-56-22-56-52z" fill="#fbf6ec" stroke="#3b2a1f" stroke-width="3"/>
-              <path d="M174 98h10a18 18 0 0 1 0 36h-14" fill="none" stroke="#3b2a1f" stroke-width="3"/>
-              <ellipse cx="118" cy="86" rx="56" ry="9" fill="#6b3d1c" stroke="#3b2a1f" stroke-width="3"/>
-            </svg>
-          </section>
 
-          <section class="s-section" data-part="menu">
-            <h2 data-t="site.menu.title"></h2>
-            <dl class="s-menu" id="s-menu"></dl>
-          </section>
+            <!-- メニュー一覧のページ -->
+            <div data-page="menu" hidden>
+              <div class="s-pagehead" data-part="pagehead">
+                <h1 data-t="site.menuPage.title"></h1>
+                <p data-t="site.menuPage.lead"></p>
+              </div>
+              <div class="s-tabs" role="tablist" data-part="tabs" id="s-tabs"></div>
+              <div class="s-grid" role="tabpanel" data-part="tabpanel" id="s-grid"></div>
+            </div>
 
-          <section class="s-section s-about" data-part="about">
-            <h2 data-t="site.about.title"></h2>
-            <p id="s-about-text" data-t="site.about.body"></p>
-          </section>
+            <!-- 商品のページ -->
+            <div data-page="item" hidden>
+              <nav class="s-crumbs" data-part="breadcrumb" id="s-crumbs"></nav>
+              <div class="s-item" id="s-item"></div>
+            </div>
 
-          <section class="s-section" data-part="info">
-            <h2 data-t="site.info.title"></h2>
-            <dl class="s-info" id="s-info"></dl>
-          </section>
-
-          <section class="s-section" data-part="news">
-            <h2 data-t="site.news.title"></h2>
-            <ul class="s-news" id="s-news"></ul>
-          </section>
+            <!-- 予約のページ -->
+            <div data-page="reserve" hidden>
+              <div class="s-pagehead" data-part="pagehead">
+                <h1 data-t="site.reserve.title"></h1>
+                <p data-t="site.reserve.lead"></p>
+              </div>
+              <section class="s-section" style="border-top: 0" data-part="form">
+                <div id="s-form-wrap"></div>
+              </section>
+              <section class="s-section" data-part="faq">
+                <h2 data-t="site.reserve.faqTitle"></h2>
+                <div class="s-faq" id="s-faq"></div>
+              </section>
+            </div>
+          </main>
 
           <footer class="s-footer" data-part="footer">
             <p data-t="site.footer.copy"></p>
             <p data-t="site.footer.note"></p>
           </footer>
+
+          <!-- モーダルとドロワーの層 -->
+          <div class="s-layer" id="s-layer" hidden>
+            <div class="s-backdrop" data-part="backdrop" id="s-backdrop"></div>
+            <div class="s-modal" role="dialog" aria-modal="true" data-part="modal" id="s-modal" hidden></div>
+            <div class="s-drawer" role="dialog" aria-modal="true" data-part="drawer" id="s-drawer" hidden></div>
+          </div>
 
           <svg class="overlay" id="overlay" aria-hidden="true"></svg>
         </div>
@@ -459,15 +716,27 @@ const TEXT = {
     app: {
       name: 'Web Terms',
       note: '試作版',
-      termsLabel: '学ぶ用語',
       stageLabel: '見本のサイト',
+      list: '用語一覧',
+      close: '閉じる',
+      prev: '前へ',
+      next: '次へ',
+      progress: '{done} / {total} 済',
+      soon: '準備中',
       done: '済',
       doneLabel: '学習済み',
-      count: '用語 {n} / {total}',
+      count: '{chapter} ・ {n} / {total}',
+      chapters: {
+        structure: '1章 ページの骨組み',
+        layout: '2章 並べ方',
+        parts: '3章 部品',
+        motion: '4章 動き',
+        outside: '5章 ページの外側',
+      },
       steps: { look: '見る', touch: '触る', check: '確かめる' },
-      next: '次へ：{step}',
+      nextStep: '次へ：{step}',
       nextTerm: '次の用語へ：{name}',
-      allDone: '5つの用語を、すべて学び終わりました。',
+      allDone: 'いま学べる用語を、すべて学び終わりました。',
       retry: 'もう一度',
       reset: 'もとに戻す',
       ok: '正解',
@@ -478,15 +747,42 @@ const TEXT = {
       header: 'ヘッダー',
       logo: 'ロゴ',
       nav: 'ナビゲーション',
-      hero: 'メインビジュアル',
+      burger: 'ハンバーガーメニュー',
+      hero: 'ヒーロー',
+      cta: 'CTA',
+      sublink: 'リンク',
+      carousel: 'カルーセル',
+      slides: 'スライド',
+      arrows: '矢印ボタン',
+      dots: 'ドット',
       menu: 'メニュー',
       about: 'お店について',
       info: '営業時間・アクセス',
       news: 'お知らせ',
+      pagehead: 'ページの見出し',
+      tabs: 'タブ',
+      tabpanel: 'タブの中身',
+      card: 'カード',
+      breadcrumb: 'パンくずリスト',
+      photo: '写真',
+      itemInfo: '商品の説明',
+      form: 'フォーム',
+      textbox: 'テキストボックス',
+      datefield: '日付の入力欄',
+      select: 'セレクトボックス',
+      radio: 'ラジオボタン',
+      textarea: 'テキストエリア',
+      submit: '送信ボタン',
+      faq: 'よくある質問',
+      accordion: 'アコーディオン',
+      backdrop: '暗い幕',
+      modal: 'モーダル',
+      close: '閉じるボタン',
+      drawer: 'ドロワー',
       footer: 'フッター',
     },
     terms: {
-      /* ---------- 1. ヘッダー ---------- */
+      /* ===== 1章 ページの骨組み ===== */
       header: {
         name: 'ヘッダー',
         en: 'Header',
@@ -504,7 +800,7 @@ const TEXT = {
         touch: {
           p1: 'ヘッダーをなくすと、サイトはどう見えるでしょう。スイッチを入れて、見本を見比べてみましょう。',
           switch: 'ヘッダーを隠す',
-          after: 'どこのお店のサイトか、メニューやアクセスへどう行けばいいか、わかりにくくなりました。ヘッダーは、サイトの「看板」と「案内板」をまとめて引き受けています。',
+          after: 'どこのお店のサイトか、メニューや予約へどう行けばいいか、わかりにくくなりました。ヘッダーは、サイトの「看板」と「案内板」をまとめて引き受けています。',
         },
         check: {
           q: '見本の中で、ヘッダーだと思う場所をクリック（スマホではタップ）してください。',
@@ -513,8 +809,6 @@ const TEXT = {
           wrong: 'そこは「{name}」です。ヘッダーは、ページのいちばん上にあります。',
         },
       },
-
-      /* ---------- 2. ナビゲーション ---------- */
       nav: {
         name: 'ナビゲーション',
         en: 'Navigation',
@@ -523,19 +817,20 @@ const TEXT = {
           p1: '見本で、赤い線で囲んだところがナビゲーションです。ヘッダーの中にあります。',
           p2: 'ひとつひとつの項目が、それぞれのページへの入り口です。押すと、見本の中で場所を示します。',
           items: [
-            { id: 'menu', label: 'メニュー', desc: '飲み物や食べ物の一覧へ' },
+            { id: 'menu', label: 'メニュー', desc: '飲み物や食べ物の一覧のページへ' },
             { id: 'about', label: 'お店について', desc: 'お店の紹介へ' },
             { id: 'info', label: 'アクセス', desc: '営業時間と行き方へ' },
             { id: 'news', label: 'お知らせ', desc: 'お休みや新しいメニューの案内へ' },
+            { id: 'reserve', label: 'ご予約', desc: '席を予約するページへ' },
           ],
           p3: 'どのページにも同じナビゲーションがあるので、いつでも行きたい場所へ移動できます。サイト全体で共通のものを「グローバルナビゲーション」と呼ぶこともあります。',
-          tip: 'スマホでは、ナビゲーションが「≡」の形のボタンの中にしまわれていることがあります。この形のボタンは「ハンバーガーメニュー」と呼ばれます。',
+          tip: 'スマホでは、ナビゲーションが「≡」の形のボタンの中にしまわれていることがあります。3章の「ドロワー」で詳しく学びます。',
         },
         touch: {
-          p1: 'ナビゲーションの項目を押してみましょう。見本の中で、その場所へ移動します。',
-          moved: '「{name}」へ移動しました。ナビゲーションがあると、長いページでも行きたい場所へすぐ行けます。',
+          p1: 'ナビゲーションの項目を押してみましょう。見本の中で、そのページや場所へ移動します。見本の上の URL も変わります。',
+          moved: '「{name}」へ移動しました。ナビゲーションがあると、行きたい場所へすぐ行けます。',
           back: 'ほかの項目も試すには、見本を上へスクロールするか、下のボタンを押します。',
-          top: 'ページの先頭へ戻る',
+          top: 'トップページへ戻る',
         },
         check: {
           q: '見本の中で、ナビゲーションだと思う場所をクリック（スマホではタップ）してください。',
@@ -544,8 +839,9 @@ const TEXT = {
           wrong: 'そこは「{name}」です。ナビゲーションは、ページの上のほうで、ほかのページの名前が並んでいるところです。',
         },
       },
-
-      /* ---------- 3. ファーストビュー ---------- */
+      hero: { name: 'ヒーロー（メインビジュアル）', en: 'Hero' },
+      section: { name: 'セクション', en: 'Section' },
+      footer: { name: 'フッター', en: 'Footer' },
       fv: {
         name: 'ファーストビュー',
         en: 'Above the Fold',
@@ -556,7 +852,7 @@ const TEXT = {
           items: [
             { id: 'logo', label: 'ロゴ', desc: '何のお店のサイトか' },
             { id: 'nav', label: 'ナビゲーション', desc: 'どこへ行けるか' },
-            { id: 'hero', label: 'メインビジュアル', desc: 'ページの顔になる、大きな見出しと絵' },
+            { id: 'hero', label: 'ヒーロー', desc: 'ページの顔になる、大きな見出しと絵' },
           ],
           p3: '訪れた人の多くは、ファーストビューを見て「読み進めるかどうか」を決めます。だから「何のサイトか」「次に何をすればいいか」を、ここに入れます。',
           tip: 'ファーストビューは和製英語です。英語では "above the fold"（新聞の折り目より上）と言います。',
@@ -568,12 +864,12 @@ const TEXT = {
           inside: 'ファーストビューに入っているもの：{list}',
           outside: '入りきらなかったもの：{list}',
           none: 'なし',
-          warn: '「メニューを見る」ボタンが外れると、押してもらえる機会が減ってしまいます。',
+          warn: '「席を予約する」ボタンが外れると、押してもらえる機会が減ってしまいます。',
           targets: {
             logo: 'ロゴ',
             nav: 'ナビゲーション',
             title: '見出し',
-            button: '「メニューを見る」ボタン',
+            button: '「席を予約する」ボタン',
             art: 'カップの絵',
           },
         },
@@ -581,12 +877,13 @@ const TEXT = {
           q: 'ファーストビューに入っていないものを探して、クリック（スマホではタップ）してください。見本をスクロールして探しましょう。',
           correct: '「{name}」は、スクロールしないと見えないので、ファーストビューの外です。赤い線より上がファーストビューでした。',
           wrong: 'そこは、ページを開いたときに見えている場所なので、ファーストビューの中です。下へスクロールして探してみましょう。',
-          fold: 'ここまでがファーストビュー',
         },
         fold: 'ここまでがファーストビュー',
       },
+      stickyHeader: { name: '固定ヘッダー', en: 'Sticky Header' },
+      breadcrumb: { name: 'パンくずリスト', en: 'Breadcrumbs' },
 
-      /* ---------- 4. 余白 ---------- */
+      /* ===== 2章 並べ方 ===== */
       space: {
         name: '余白',
         en: 'Whitespace',
@@ -600,7 +897,7 @@ const TEXT = {
             { id: 'item', label: '品物どうし', desc: 'ひとつずつを見分けやすくする' },
           ],
           p3: '何も置かれていないのに、余白は「どこからどこまでがひとまとまりか」を伝えています。人は、近いものは仲間、離れているものは別のもの、と感じるからです。',
-          tip: '余白には「内側の余白（パディング）」と「外側の余白（マージン）」の2種類があります。名前は、あとで覚えれば大丈夫です。',
+          tip: '余白には「内側の余白（パディング）」と「外側の余白（マージン）」の2種類があります。このあとの用語で学びます。',
         },
         touch: {
           p1: 'つまみを動かして、見本の余白を広げたり詰めたりしてみましょう。',
@@ -617,8 +914,8 @@ const TEXT = {
           wrong: 'そこは「{name}」です。ここの余白は足りています。ほかの場所と見比べて、窮屈に見えるところを探してみましょう。',
         },
       },
-
-      /* ---------- 5. 行間 ---------- */
+      margin: { name: 'マージン', en: 'Margin' },
+      padding: { name: 'パディング', en: 'Padding' },
       lineHeight: {
         name: '行間',
         en: 'Line Height',
@@ -646,15 +943,226 @@ const TEXT = {
         },
         rule: '1行の高さ {px}px',
       },
+      card: { name: 'カード', en: 'Card' },
+      grid: { name: 'グリッド', en: 'Grid' },
+      responsive: { name: 'レスポンシブ', en: 'Responsive Design' },
+
+      /* ===== 3章 部品 ===== */
+      cta: {
+        name: 'CTA',
+        en: 'Call to Action',
+        lead: '見た人に「次にしてほしいこと」を伝える、目立つボタンやリンクのこと。',
+        look: {
+          p1: '見本では、赤い線で囲んだ「席を予約する」ボタンが CTA です。お店がいちばんしてほしいこと（予約）へ案内しています。',
+          p2: 'すぐ横の「メニューを見る」と比べてみましょう。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'cta', label: '席を予約する', desc: '色のついたボタン。いちばんしてほしいこと' },
+            { id: 'sublink', label: 'メニューを見る', desc: '控えめなリンク。ほかの行き先' },
+          ],
+          p3: 'CTA は、色や大きさでほかより目立たせます。1つの画面にたくさん置くと、どれを押せばいいか迷うので、いちばん大事なものを1つ決めます。',
+          tip: 'CTA は Call To Action（行動の呼びかけ）の略です。',
+        },
+        touch: {
+          p1: 'CTA を目立たなくすると、どう見えるでしょう。スイッチを入れて、見本を見比べてみましょう。',
+          switch: 'CTA を目立たなくする',
+          after: '「席を予約する」がまわりの文字にまぎれて、どこを押せばいいかわかりにくくなりました。予約してもらえる機会も減ってしまいます。',
+        },
+        check: {
+          q: '見本のトップページで、CTA だと思う場所をクリック（スマホではタップ）してください。',
+          correct: '色のついた「席を予約する」ボタンが CTA です。',
+          sub: 'そこは「メニューを見る」のリンクです。リンクですが、控えめにしてあります。いちばん目立つものを探してみましょう。',
+          wrong: 'そこは「{name}」です。見た人に「次にしてほしいこと」を伝えるボタンを探してみましょう。',
+        },
+      },
+      form: {
+        name: 'フォーム',
+        en: 'Form',
+        lead: '名前や日にちなどを入力して、送るための部品の集まり。',
+        look: {
+          p1: '見本の予約のページで、赤い線で囲んだところがフォームです。',
+          p2: 'フォームは、いくつかの部品でできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'textbox', label: 'テキストボックス', desc: '文字を書き込む欄' },
+            { id: 'select', label: 'セレクトボックス', desc: '押すと一覧が開き、1つ選ぶ' },
+            { id: 'radio', label: 'ラジオボタン', desc: '並んだ中から1つ選ぶ' },
+            { id: 'textarea', label: 'テキストエリア', desc: '長い文章を書き込む欄' },
+            { id: 'submit', label: '送信ボタン', desc: '入力した内容を送る' },
+          ],
+          p3: '欄の上にある「お名前」のような説明を「ラベル」と呼びます。ラベルがあると、何を書けばいいか迷いません。',
+          tip: '見本のフォームの部品にも、マウスを乗せて（スマホではタップして）みましょう。それぞれの名前が出ます。',
+        },
+        touch: {
+          p1: 'フォームに入力して、送ってみましょう。まずは、何も入力せずに「予約内容を送る」を押してみてください。',
+          error: 'エラーメッセージが出ました。どこを、どう直せばいいかを、欄のすぐ近くで知らせるのが親切です。',
+          ok: '送れました。見本のフォームなので、入力した内容はどこにも送られていません。',
+        },
+        check: {
+          q: 'このフォームの中で、押すと一覧が開いて1つ選べる部品（セレクトボックス）をクリック（スマホではタップ）してください。',
+          correct: '「時間」や「人数」の欄がセレクトボックスです。右の「▼」の形が目印です。',
+          wrong: 'そこは「{name}」です。押すと一覧が開く部品を探してみましょう。',
+        },
+      },
+      tabs: {
+        name: 'タブ',
+        en: 'Tabs',
+        lead: '見出しを押して、同じ場所の中身を切り替える部品。',
+        look: {
+          p1: '見本のメニューのページで、赤い線で囲んだところがタブです。',
+          p2: 'タブは、次の2つでできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'tabs', label: 'タブ', desc: '押して切り替える見出し' },
+            { id: 'tabpanel', label: 'タブの中身', desc: '選んだタブに対応する中身' },
+          ],
+          p3: 'タブを使うと、ページを移動せずに中身を切り替えられるので、ページが長くなりません。いま選んでいるタブは、色や下線でわかるようにします。',
+          tip: '紙のファイルの見出し（インデックス）を「タブ」と呼ぶことから、この名前がつきました。',
+        },
+        touch: {
+          p1: '見本のタブを押して、中身を切り替えてみましょう。',
+          switched: '「{name}」に切り替わりました。ページは移動せず、下の中身だけが入れ替わっています。',
+        },
+        check: {
+          q: '見本で、ケーキのメニューを表示してください。',
+          correct: '「ケーキ」のタブを押すと、中身がケーキに切り替わりました。',
+          wrong: 'いまは「{name}」が表示されています。ケーキのタブを探してみましょう。',
+        },
+      },
+      accordion: {
+        name: 'アコーディオン',
+        en: 'Accordion',
+        lead: '見出しを押すと、その下の中身が開いたり閉じたりする部品。',
+        look: {
+          p1: '見本の予約のページの「よくある質問」が、アコーディオンになっています。',
+          p2: '見出し（質問）を押すと、中身（答え）が開きます。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'faq', label: 'アコーディオン全体', desc: '質問と答えの組が並んでいる' },
+            { id: 'summary', label: '見出し（質問）', desc: '押すと開く。右の「＋」が目印' },
+          ],
+          p3: '必要な人だけが開いて読めるので、ページがすっきりします。「よくある質問」でよく使われます。',
+          tip: '楽器のアコーディオンのように、伸びたり縮んだりすることから名付けられました。',
+        },
+        touch: {
+          p1: '見本の質問を押して、開いたり閉じたりしてみましょう。',
+          opened: '開きました。答えが現れ、その下の内容が押し下げられています。',
+          closed: '閉じました。答えが隠れて、ページが短くなりました。',
+        },
+        check: {
+          q: '見本の「よくある質問」で、駐車場があるかどうかを調べてください。',
+          correct: '「駐車場はありますか？」を開くと、答えが読めました。お店に駐車場はないそうです。',
+          wrong: 'それは「{name}」の答えでした。駐車場についての質問を探してみましょう。',
+        },
+      },
+      carousel: {
+        name: 'カルーセル',
+        en: 'Carousel',
+        lead: 'いくつかの中身を、1枚ずつ横に送って見せる部品。',
+        look: {
+          p1: '見本のトップページの「季節のおすすめ」が、カルーセルになっています。',
+          p2: 'カルーセルは、次の部品でできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'slides', label: 'スライド', desc: '1枚ずつの中身' },
+            { id: 'arrows', label: '矢印ボタン', desc: '前後のスライドへ送る' },
+            { id: 'dots', label: 'ドット', desc: '全部で何枚あり、いま何枚目かを示す' },
+          ],
+          p3: '限られた場所で、いくつもの内容を見せられます。ただ、2枚目より後は見てもらえないことも多いので、大事なことは1枚目に置きます。',
+          tip: '遊園地の回転木馬（カルーセル）のように、ぐるぐる回って見えることから名付けられました。',
+        },
+        touch: {
+          p1: '矢印やドットを押して（スマホではスワイプして）、スライドを送ってみましょう。',
+          now: '{n}枚目：{title}',
+        },
+        check: {
+          q: '見本のカルーセルで、3枚目のスライドを表示してください。',
+          correct: '3枚目の「豆の量り売り」が表示されました。',
+          wrong: 'いまは{name}枚目です。3枚目まで送ってみましょう。',
+        },
+      },
+      modal: {
+        name: 'モーダル',
+        en: 'Modal',
+        lead: 'ページの上に重なって開く、小さな窓のこと。',
+        look: {
+          p1: '見本の商品のページで写真を押すと、写真が大きく表示される窓が開きます。これがモーダルです。',
+          p2: 'モーダルは、次の部品でできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'modal', label: 'モーダル', desc: 'ページの上に重なった窓' },
+            { id: 'backdrop', label: '暗い幕', desc: '後ろのページを触れなくする' },
+            { id: 'close', label: '閉じるボタン', desc: '窓を閉じる' },
+          ],
+          p3: 'モーダルが開いている間は、後ろのページを操作できません。写真の拡大や、大事な確認などに使います。',
+          tip: '閉じ方は「閉じるボタン」「暗い幕を押す」「Esc キー」の3つを用意するのが親切です。',
+        },
+        touch: {
+          p1: '見本の写真を押してモーダルを開き、いろいろな方法で閉じてみましょう。',
+          opened: '開きました。後ろのページは、スクロールも操作もできなくなっています。',
+          closedClose: '閉じるボタンで閉じました。',
+          closedBackdrop: '暗い幕を押して閉じました。',
+          closedEsc: 'Esc キーで閉じました。',
+        },
+        check: {
+          q: '見本でモーダルを開いて、閉じるボタン以外の方法で閉じてください。',
+          correct: '閉じるボタン以外でも閉じられました。どの方法でも閉じられると、使う人が迷いません。',
+          wrong: '閉じるボタンで閉じました。もう一度開いて、ほかの方法を試してみましょう。',
+        },
+      },
+      drawer: {
+        name: 'ドロワー',
+        en: 'Drawer',
+        lead: '画面の端から引き出される、ナビゲーションなどの入れ物。',
+        look: {
+          p1: '見本をスマホの幅にしました。ナビゲーションが、ヘッダーの「≡」のボタンの中にしまわれています。',
+          p2: '「≡」を押すと、横からドロワーが引き出されます。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'burger', label: 'ハンバーガーメニュー', desc: '≡ の形のボタン。押すとドロワーが開く' },
+            { id: 'drawer', label: 'ドロワー', desc: '横から出てくる、ナビゲーションの入れ物' },
+          ],
+          p3: 'スマホのように画面がせまいと、ナビゲーションを横に並べきれません。そこで、ふだんはしまっておき、必要なときだけ引き出します。',
+          tip: '「≡」の形が、パン・具・パンを重ねたハンバーガーに見えることから、ハンバーガーメニューと呼ばれます。このアプリの「用語一覧」も、ドロワーの形をしています。',
+        },
+        touch: {
+          p1: '見本の「≡」を押して、ドロワーを開け閉めしてみましょう。中の項目を押すと、そのページへ移動します。',
+          opened: 'ドロワーが開きました。閉じるには、閉じるボタンか、暗い幕を押します。',
+          closed: 'ドロワーを閉じました。',
+          moved: '「{name}」へ移動しました。',
+        },
+        check: {
+          q: '見本で、「アクセス」の場所へ移動してください。',
+          correct: '「≡」でドロワーを開いて、「アクセス」へ移動できました。',
+          wrong: '「{name}」へ移動しました。もう一度ドロワーを開いて、「アクセス」を探してみましょう。',
+        },
+      },
+
+      /* ===== 4章 動き ===== */
+      hover: { name: 'ホバー', en: 'Hover' },
+      scrollAnim: { name: 'スクロールアニメーション', en: 'Scroll Animation' },
+
+      /* ===== 5章 ページの外側 ===== */
+      favicon: { name: 'ファビコン', en: 'Favicon' },
+      ogp: { name: 'OGP', en: 'Open Graph Protocol' },
     },
+
+    /* ---------- 見本のサイトの文章 ---------- */
     site: {
-      url: 'hidamari-coffee.example',
+      host: 'hidamari-coffee.example/',
       name: 'ひだまり珈琲店',
-      nav: { menu: 'メニュー', about: 'お店について', access: 'アクセス', news: 'お知らせ' },
+      nav: { menu: 'メニュー', about: 'お店について', access: 'アクセス', news: 'お知らせ', reserve: 'ご予約' },
+      burger: 'メニューを開く',
+      close: '閉じる',
       hero: {
         title: '朝の光と、深煎りの一杯。',
         body: '駅から歩いて3分の、小さな喫茶店です。毎朝7時に開きます。',
-        button: 'メニューを見る',
+        button: '席を予約する',
+        sub: 'メニューを見る',
+      },
+      carousel: {
+        title: '季節のおすすめ',
+        prev: '前のスライド',
+        next: '次のスライド',
+        dot: '{n}枚目',
+        slides: [
+          { kind: 'cake', color: '#c8763a', title: 'りんごのタルト', body: '11月だけの季節のケーキです。りんごを薄く切って並べています。' },
+          { kind: 'drink', color: '#d9b779', title: 'ジンジャーミルク', body: '寒い朝に、しょうがを効かせた温かい牛乳はいかがですか。' },
+          { kind: 'bag', color: '#b9946a', title: '豆の量り売り', body: 'ひだまりブレンドの豆を、200グラムからお分けしています。' },
+        ],
       },
       menu: {
         title: 'メニュー',
@@ -685,6 +1193,54 @@ const TEXT = {
           ['10月20日', '10月27日（日）は、店内の点検のためお休みします。'],
         ],
       },
+      menuPage: {
+        title: 'メニュー',
+        lead: '一杯ずつ、注文を受けてからいれています。',
+        tabs: { drink: 'ドリンク', food: 'フード', cake: 'ケーキ' },
+      },
+      items: [
+        { id: 'blend', cat: 'drink', color: '#6b3d1c', name: 'ひだまりブレンド', price: '480円', desc: '深煎りの豆を3種類合わせた、店の看板です。苦みの奥に、ほのかな甘さがあります。' },
+        { id: 'aulait', cat: 'drink', color: '#b0835a', name: 'カフェオレ', price: '560円', desc: 'ブレンドを濃いめにいれて、温めた牛乳と半分ずつ合わせています。' },
+        { id: 'ginger', cat: 'drink', color: '#d9b779', name: 'ジンジャーミルク', price: '540円', desc: 'しょうがを効かせた、温かい牛乳です。寒い朝におすすめです。' },
+        { id: 'toast', cat: 'food', color: '#d49a52', name: '厚切りトースト', price: '420円', desc: '近くのパン屋さんの食パンを、4センチの厚さに切って焼きます。' },
+        { id: 'sand', cat: 'food', color: '#e8c95a', name: 'たまごサンド', price: '620円', desc: 'ゆで卵を粗くつぶして、マヨネーズで和えています。' },
+        { id: 'tart', cat: 'cake', color: '#c8763a', name: 'りんごのタルト', price: '520円', desc: '11月だけの季節のケーキです。りんごを薄く切って並べています。' },
+        { id: 'cheese', cat: 'cake', color: '#e6c48a', name: 'チーズケーキ', price: '500円', desc: '焼き色を濃くつけた、しっとりしたチーズケーキです。' },
+      ],
+      item: {
+        home: 'ホーム',
+        menu: 'メニュー',
+        zoom: '写真を拡大する',
+        note: '写真を押すと、大きく表示します。',
+        back: 'メニューの一覧へ戻る',
+      },
+      reserve: {
+        title: 'ご予約',
+        lead: '席のご予約は、前日までにお願いします。',
+        name: 'お名前',
+        date: '日にち',
+        time: '時間',
+        people: '人数',
+        peopleUnit: '{n}人',
+        seat: '席の希望',
+        counter: 'カウンター',
+        table: 'テーブル',
+        note: 'ご要望',
+        notePh: 'アレルギーなどがあれば、お書きください',
+        required: '必須',
+        submit: '予約内容を送る',
+        errName: 'お名前を入力してください。',
+        errDate: '日にちを選んでください。',
+        done: 'ご予約を受け付けました。',
+        doneNote: '見本のフォームなので、入力した内容はどこにも送られていません。',
+        again: 'もう一度入力する',
+        faqTitle: 'よくある質問',
+        faq: [
+          { id: 'walkin', q: '予約なしでも入れますか？', a: 'はい。席が空いていれば、予約なしでもご案内します。' },
+          { id: 'parking', q: '駐車場はありますか？', a: 'お店に駐車場はありません。近くのコインパーキングをご利用ください。' },
+          { id: 'beans', q: '豆だけ買えますか？', a: 'はい。ひだまりブレンドの豆を、200グラム1,200円でお分けしています。' },
+        ],
+      },
       footer: {
         copy: '© ひだまり珈琲店',
         note: 'このお店は、Web Terms の練習用につくった架空のお店です。',
@@ -693,10 +1249,19 @@ const TEXT = {
   },
 };
 
-/* 学ぶ用語の並び */
-const TERMS = ['header', 'nav', 'fv', 'space', 'lineHeight'];
+/* 章と用語の並び */
+const CHAPTERS = [
+  { id: 'structure', terms: ['header', 'nav', 'hero', 'section', 'footer', 'fv', 'stickyHeader', 'breadcrumb'] },
+  { id: 'layout', terms: ['space', 'margin', 'padding', 'lineHeight', 'card', 'grid', 'responsive'] },
+  { id: 'parts', terms: ['cta', 'form', 'tabs', 'accordion', 'carousel', 'modal', 'drawer'] },
+  { id: 'motion', terms: ['hover', 'scrollAnim'] },
+  { id: 'outside', terms: ['favicon', 'ogp'] },
+];
+const TERMS = CHAPTERS.flatMap((c) => c.terms);
+const chapterOf = (id) => CHAPTERS.find((c) => c.terms.includes(id));
 const STEPS = ['look', 'touch', 'check'];
 const DEFAULT = { space: 1, lh: 1.8 };
+const PATHS = { home: '', menu: 'menu/', item: 'menu/{id}/', reserve: 'reserve/' };
 
 let lang = 'ja';
 const t = (key, vars) => {
@@ -706,13 +1271,14 @@ const t = (key, vars) => {
   return s;
 };
 
-/* 進み具合は、このブラウザの中にだけ覚えておく（使えなくても動く） */
+/* 進み具合と、最後に開いた用語は、このブラウザの中にだけ覚えておく（使えなくても動く） */
 const STORE_KEY = 'webterms.progress';
-function loadProgress() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+const LAST_KEY = 'webterms.last';
+function load(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
 }
-function saveProgress() {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(state.progress)); } catch { /* 覚えられなくても続ける */ }
+function save(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* 覚えられなくても続ける */ }
 }
 
 const state = {
@@ -721,13 +1287,19 @@ const state = {
   hover: null,      // 見る：マウスが乗っている部分
   pinned: null,     // 見る：パネルのボタンで示している項目の id
   answer: null,     // 確かめる：答えの結果
+  event: null,      // 触る：見本で起きたこと（パネルに表示する）
   hidden: false,    // ヘッダー：隠しているか
-  moved: null,      // ナビゲーション：移動した先
+  ctaWeak: false,   // CTA：目立たなくしているか
   vpH: null,        // ファーストビュー：見本の画面の高さ（null ならふつう）
   vpMax: 0,
-  space: DEFAULT.space,  // 余白の倍率
-  lh: DEFAULT.lh,        // 行の高さ
-  progress: loadProgress(),
+  space: DEFAULT.space,
+  lh: DEFAULT.lh,
+  page: 'home',     // 見本のいまのページ
+  item: 'blend',    // 商品のページで表示している商品
+  tab: 'drink',     // メニューのページのタブ
+  slide: 0,         // カルーセルの何枚目か
+  layer: null,      // 'modal' | 'drawer' | null
+  progress: load(STORE_KEY, {}),
 };
 
 /* ---- 小さな道具 ---- */
@@ -736,14 +1308,17 @@ const site = $('#site');
 const vp = $('#viewport');
 const overlay = $('#overlay');
 const panel = $('#panel');
-const part = (name) => site.querySelector(`[data-part="${name}"]`);
+const part = (name) => site.querySelector(`[data-page]:not([hidden]) [data-part="${name}"], .s-header [data-part="${name}"], .s-layer [data-part="${name}"], [data-part="${name}"]:is(.s-header, .s-footer)`);
 const T = (k, v) => t(`terms.${state.term}.${k}`, v);
+const L = () => LESSONS[state.term];
+const isQuiz = () => state.step === 'check' && !!L()?.check.inSample;
 function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k === 'on') for (const [ev, fn] of Object.entries(v)) el.addEventListener(ev, fn);
     else if (k === 'class') el.className = v;
     else if (k === 'style') el.style.cssText = v;
+    else if (k === 'html') el.innerHTML = v;
     else if (v === true) el.setAttribute(k, '');
     else if (v !== false && v != null) el.setAttribute(k, v);
   }
@@ -752,39 +1327,280 @@ function h(tag, attrs = {}, ...children) {
 }
 const round1 = (n) => Math.round(n * 10) / 10;
 
-/* ---- 文章を流し込む ---- */
-function applyText() {
+/* 見本の絵（飲み物・食べ物・ケーキ・豆の袋） */
+function art(kind, color) {
+  const line = 'stroke="#3b2a1f" stroke-width="2.5"';
+  const body = {
+    drink: `<ellipse cx="60" cy="80" rx="40" ry="7" fill="#e2d3bb"/><path d="M32 36h56v18c0 15-12.5 26-28 26s-28-11-28-26z" fill="#fbf6ec" ${line}/><path d="M88 42h5a9 9 0 0 1 0 18h-7" fill="none" ${line}/><ellipse cx="60" cy="36" rx="28" ry="5" fill="${color}" ${line}/>`,
+    food: `<ellipse cx="60" cy="70" rx="46" ry="12" fill="#fbf6ec" ${line}/><path d="M36 30q0-14 24-14t24 14v32h-48z" fill="${color}" ${line}/><path d="M42 34q0-9 18-9t18 9v24h-36z" fill="#f3dcae"/>`,
+    cake: `<ellipse cx="60" cy="72" rx="44" ry="11" fill="#fbf6ec" ${line}/><path d="M30 64L90 64L90 38L30 52z" fill="#f3dcae" ${line}/><path d="M30 52L90 38L90 32L30 46z" fill="${color}" ${line}/>`,
+    bag: `<ellipse cx="60" cy="80" rx="34" ry="6" fill="#e2d3bb"/><path d="M38 26h44l6 52H32z" fill="${color}" ${line}/><path d="M38 26l4-8h36l4 8" fill="#d8bf98" ${line}/><circle cx="60" cy="52" r="9" fill="#fbf6ec"/>`,
+  }[kind];
+  return `<svg viewBox="0 0 120 90" aria-hidden="true">${body}</svg>`;
+}
+
+/* ============================================================
+   見本のサイトを組み立てる
+   ============================================================ */
+function buildSite() {
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
+  $('#s-burger').setAttribute('aria-label', t('site.burger'));
+
   $('#s-menu').replaceChildren(...t('site.menu.items').flatMap((m) => [
     h('dt', { class: 'row' }, m.name, h('span', { class: 'price' }, m.price)),
     h('dd', {}, m.desc),
   ]));
   $('#s-info').replaceChildren(...t('site.info.rows').flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)]));
   $('#s-news').replaceChildren(...t('site.news.items').map(([d, s]) => h('li', {}, h('time', {}, d), h('span', {}, s))));
+
+  // カルーセル
+  const slides = t('site.carousel.slides');
+  $('#s-track').replaceChildren(...slides.map((s, i) => h('div', {
+    class: 's-slide', role: 'group', 'aria-roledescription': 'slide', 'aria-label': t('site.carousel.dot', { n: i + 1 }),
+  }, h('div', { html: art(s.kind, s.color) }), h('div', {}, h('h3', {}, s.title), h('p', {}, s.body)))));
+  $('#s-dots').replaceChildren(...slides.map((_, i) => h('button', {
+    type: 'button', class: 's-dot', 'aria-label': t('site.carousel.dot', { n: i + 1 }),
+    on: { click: () => { if (!isQuiz()) goSlide(i); } },
+  })));
+  $('#s-prev').setAttribute('aria-label', t('site.carousel.prev'));
+  $('#s-next').setAttribute('aria-label', t('site.carousel.next'));
+
+  // タブ
+  $('#s-tabs').replaceChildren(...Object.entries(t('site.menuPage.tabs')).map(([id, label]) => h('button', {
+    type: 'button', role: 'tab', 'data-tab': id,
+    on: { click: () => { if (!isQuiz()) setTab(id, true); } },
+  }, label)));
+
+  buildForm();
+  // 開け閉めは、人が見出しを押したときだけ知らせる（はじめの状態に戻すときは知らせない）
+  let pressed = 0;
+  $('#s-faq').replaceChildren(...t('site.reserve.faq').map((f) => {
+    const d = h('details', { 'data-faq': f.id },
+      h('summary', { 'data-part': 'summary', on: { click: () => { pressed = performance.now(); } } }, f.q),
+      h('p', {}, f.a));
+    d.addEventListener('toggle', () => {
+      if (performance.now() - pressed < 1000) notify('faq', { id: f.id, q: f.q, open: d.open });
+    });
+    return d;
+  }));
 }
+
+function buildForm() {
+  const R = (k, v) => t(`site.reserve.${k}`, v);
+  const req = () => h('span', { class: 's-req' }, R('required'));
+  const hours = Array.from({ length: 11 }, (_, i) => `${i + 7}:00`);
+  const form = h('form', { class: 's-form', novalidate: true },
+    h('div', { class: 's-field', 'data-part': 'textbox', 'data-field': 'name' },
+      h('label', { for: 'f-name' }, R('name'), req()), h('input', { type: 'text', id: 'f-name', name: 'name', autocomplete: 'off' })),
+    h('div', { class: 's-row2' },
+      h('div', { class: 's-field', 'data-part': 'datefield', 'data-field': 'date' },
+        h('label', { for: 'f-date' }, R('date'), req()), h('input', { type: 'date', id: 'f-date', name: 'date' })),
+      h('div', { class: 's-field', 'data-part': 'select' },
+        h('label', { for: 'f-time' }, R('time')), h('select', { id: 'f-time', name: 'time' }, hours.map((x) => h('option', {}, x))))),
+    h('div', { class: 's-row2' },
+      h('div', { class: 's-field', 'data-part': 'select' },
+        h('label', { for: 'f-people' }, R('people')), h('select', { id: 'f-people', name: 'people' }, [1, 2, 3, 4].map((n) => h('option', { value: n }, R('peopleUnit', { n }))))),
+      h('fieldset', { class: 's-field', 'data-part': 'radio', style: 'border:0;margin:0;padding:0;min-width:0' },
+        h('legend', { class: 'legend' }, R('seat')),
+        h('div', { class: 's-radios' },
+          h('label', {}, h('input', { type: 'radio', name: 'seat', value: 'counter', checked: true }), R('counter')),
+          h('label', {}, h('input', { type: 'radio', name: 'seat', value: 'table' }), R('table'))))),
+    h('div', { class: 's-field', 'data-part': 'textarea' },
+      h('label', { for: 'f-note' }, R('note')), h('textarea', { id: 'f-note', name: 'note', placeholder: R('notePh') })),
+    h('div', {}, h('button', { type: 'submit', class: 's-btn', 'data-part': 'submit' }, R('submit'))),
+  );
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (isQuiz()) return;
+    // 入力の確認：必須の欄が空なら、欄のすぐ下にエラーを出す
+    let ok = true;
+    for (const [field, msg] of [['name', 'errName'], ['date', 'errDate']]) {
+      const wrap = form.querySelector(`[data-field="${field}"]`);
+      wrap.querySelector('.s-err')?.remove();
+      const empty = !wrap.querySelector('input').value.trim();
+      wrap.classList.toggle('err', empty);
+      if (empty) { ok = false; wrap.append(h('p', { class: 's-err', role: 'alert' }, R(msg))); }
+    }
+    if (ok) {
+      $('#s-form-wrap').replaceChildren(h('div', { class: 's-done', role: 'status' },
+        h('p', {}, h('b', {}, R('done'))),
+        h('p', { class: 'note' }, R('doneNote')),
+        h('button', { type: 'button', class: 's-btn', on: { click: () => { buildForm(); notify('formReset'); } } }, R('again'))));
+    }
+    notify('submit', { ok });
+  });
+  $('#s-form-wrap').replaceChildren(form);
+}
+
+/* ---- ページの切り替え ---- */
+function setPage(page, { keepScroll = false } = {}) {
+  state.page = page;
+  site.querySelectorAll('[data-page]').forEach((el) => { el.hidden = el.dataset.page !== page; });
+  $('#url').textContent = t('site.host') + PATHS[page].replace('{id}', state.item);
+  if (page === 'menu') setTab(state.tab);
+  if (page === 'item') buildItem();
+  if (!keepScroll) vp.scrollTop = 0;
+}
+function go(target) {
+  const [page, anchor] = target.split('#');
+  if (page.startsWith('item:')) { state.item = page.slice(5); setPage('item'); return; }
+  setPage(page);
+  if (anchor) vp.scrollTop = Math.max(0, boxOf(part(anchor)).y);
+}
+
+function setTab(id, fromUser = false) {
+  state.tab = id;
+  $('#s-tabs').querySelectorAll('[role="tab"]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === id)));
+  $('#s-grid').replaceChildren(...t('site.items').filter((it) => it.cat === id).map((it) => h('a', {
+    href: '#', class: 's-card', 'data-part': 'card', 'data-go': `item:${it.id}`,
+  }, h('div', { class: 'art', html: art(it.cat === 'food' ? 'food' : it.cat === 'cake' ? 'cake' : 'drink', it.color) }),
+    h('div', { class: 'body' }, h('div', { class: 'name' }, it.name, h('span', {}, it.price)), h('p', {}, it.desc)))));
+  if (fromUser) notify('tab', { id, label: t(`site.menuPage.tabs.${id}`) });
+  draw();
+}
+
+function itemData() { return t('site.items').find((x) => x.id === state.item); }
+function buildItem() {
+  const it = itemData();
+  const I = (k) => t(`site.item.${k}`);
+  const kind = it.cat === 'food' ? 'food' : it.cat === 'cake' ? 'cake' : 'drink';
+  $('#s-crumbs').setAttribute('aria-label', t('parts.breadcrumb'));
+  $('#s-crumbs').replaceChildren(h('ol', {},
+    h('li', {}, h('a', { href: '#', 'data-go': 'home' }, I('home'))),
+    h('li', {}, h('a', { href: '#', 'data-go': 'menu' }, I('menu'))),
+    h('li', { 'aria-current': 'page' }, it.name)));
+  $('#s-item').replaceChildren(
+    h('div', {},
+      h('button', { type: 'button', class: 's-photo', 'data-part': 'photo', 'aria-label': I('zoom'), html: art(kind, it.color),
+        on: { click: () => { if (!isQuiz()) openLayer('modal'); } } }),
+      h('p', { class: 's-photo-note' }, I('note'))),
+    h('div', { 'data-part': 'itemInfo' },
+      h('h1', {}, it.name),
+      h('p', { class: 'price' }, it.price),
+      h('p', {}, it.desc),
+      h('a', { href: '#', class: 's-sublink', 'data-go': 'menu' }, I('back'))));
+}
+
+/* ---- カルーセル ---- */
+const track = $('#s-track');
+function goSlide(i, smooth = true) {
+  const n = track.children.length;
+  i = Math.max(0, Math.min(n - 1, i));
+  track.scrollTo({ left: i * track.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+  markSlide(i);
+}
+function markSlide(i) {
+  const changed = i !== state.slide;
+  state.slide = i;
+  $('#s-dots').querySelectorAll('.s-dot').forEach((d, k) => d.setAttribute('aria-current', String(k === i)));
+  if (changed) notify('slide', { i });
+}
+$('#s-prev').addEventListener('click', () => { if (!isQuiz()) goSlide(state.slide - 1); });
+$('#s-next').addEventListener('click', () => { if (!isQuiz()) goSlide(state.slide + 1); });
+let slideTimer;
+track.addEventListener('scroll', () => {
+  clearTimeout(slideTimer);
+  slideTimer = setTimeout(() => markSlide(Math.round(track.scrollLeft / track.clientWidth)), 80);
+}, { passive: true });
+
+/* ---- モーダルとドロワー ---- */
+const layer = $('#s-layer');
+function openLayer(kind) {
+  state.layer = kind;
+  const box = kind === 'modal' ? $('#s-modal') : $('#s-drawer');
+  if (kind === 'modal') {
+    const it = itemData();
+    const kindArt = it.cat === 'food' ? 'food' : it.cat === 'cake' ? 'cake' : 'drink';
+    box.replaceChildren(
+      h('button', { type: 'button', class: 's-close', 'data-part': 'close', 'aria-label': t('site.close'), html: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8"/></svg>',
+        on: { click: () => closeLayer('close') } }),
+      h('div', { class: 'art', html: art(kindArt, it.color) }),
+      h('p', {}, it.name));
+    box.setAttribute('aria-label', it.name);
+  } else {
+    box.replaceChildren(
+      h('button', { type: 'button', class: 's-close', 'data-part': 'close', 'aria-label': t('site.close'), html: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8"/></svg>',
+        on: { click: () => closeLayer('close') } }),
+      h('ul', {}, [...site.querySelectorAll('.s-nav a')].map((a) => h('li', {}, h('a', { href: '#', 'data-go': a.dataset.go }, a.textContent)))));
+    box.setAttribute('aria-label', t('parts.nav'));
+  }
+  $('#s-modal').hidden = kind !== 'modal';
+  $('#s-drawer').hidden = kind !== 'drawer';
+  layer.hidden = false;
+  vp.classList.add('locked');   // 後ろのページはスクロールできなくする
+  positionLayer();
+  $('.s-close', box).focus({ preventScroll: true });
+  notify(kind, { open: true });
+  draw();
+}
+function closeLayer(via) {
+  const kind = state.layer;
+  if (!kind) return;
+  state.layer = null;
+  layer.hidden = true;
+  vp.classList.remove('locked');
+  notify(kind, { open: false, via });
+  draw();
+}
+function positionLayer() {
+  if (layer.hidden) return;
+  layer.style.top = `${vp.scrollTop}px`;
+  layer.style.height = `${vp.clientHeight}px`;
+}
+$('#s-backdrop').addEventListener('click', () => closeLayer('backdrop'));
+$('#s-burger').addEventListener('click', () => { if (!isQuiz()) openLayer('drawer'); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && state.layer && !$('#list').open) closeLayer('esc');
+});
 
 /* ============================================================
    見本のサイトの状態を、いまの学習に合わせる
    ============================================================ */
 function applySite() {
+  const lesson = L();
   part('header').hidden = state.hidden;
   site.style.setProperty('--sp', state.space);
   site.style.setProperty('--lh', state.lh);
-  part('info').classList.toggle('cramped', state.term === 'space' && state.step === 'check');
-  if (state.vpH) { vp.style.flex = '0 0 auto'; vp.style.height = `${state.vpH}px`; }
-  else { vp.style.flex = ''; vp.style.height = ''; }
-  const quiz = state.step === 'check' && LESSONS[state.term].check.inSample;
+  site.classList.toggle('cta-weak', state.ctaWeak);
+  site.classList.toggle('compact', !!lesson.compact);
+  site.querySelector('[data-part="info"]').classList.toggle('cramped', state.term === 'space' && state.step === 'check');
+  // 見本の画面の大きさ（ファーストビューの高さ、ドロワーのスマホ幅）
+  vp.style.flex = state.vpH ? '0 0 auto' : '';
+  vp.style.height = state.vpH ? `${state.vpH}px` : '';
+  const w = lesson.frameWidth;
+  vp.style.width = w ? `min(${w}px, 100%)` : '';
+  vp.style.alignSelf = w ? 'center' : '';
+  const quiz = isQuiz();
   site.classList.toggle('quiz', quiz);
   site.querySelectorAll('[data-part]').forEach((el) => {
-    if (quiz) el.tabIndex = 0;
-    else el.removeAttribute('tabindex');
+    if (quiz && !el.matches('a, button, input, select, textarea, summary')) el.tabIndex = 0;
+    else if (el.hasAttribute('tabindex') && !el.matches('a, button')) el.removeAttribute('tabindex');
   });
+}
+
+/* 用語や段階を変えたとき、見本をはじめの状態に戻す */
+function resetSample() {
+  state.hidden = false;
+  state.ctaWeak = false;
+  state.vpH = null;
+  state.space = DEFAULT.space;
+  state.lh = DEFAULT.lh;
+  state.event = null;
+  if (state.layer) { state.layer = null; layer.hidden = true; vp.classList.remove('locked'); }
+  state.item = 'blend';
+  state.tab = 'drink';
+  state.slide = 0;
+  track.scrollLeft = 0;
+  $('#s-dots').querySelectorAll('.s-dot').forEach((d, k) => d.setAttribute('aria-current', String(k === 0)));
+  site.querySelectorAll('.s-faq details').forEach((d) => { d.open = false; });
+  buildForm();
 }
 
 function scrollStage(target) {
   if (!target) { vp.scrollTop = 0; return; }
-  vp.scrollTop = Math.max(0, boxOf(part(target)).y - 12);
+  const el = part(target);
+  vp.scrollTop = el ? Math.max(0, boxOf(el).y - 12) : 0;
 }
 
 /* ============================================================
@@ -813,8 +1629,9 @@ function defs() {
 
 /* 囲み＋引き出し線＋名前 */
 function annotate(el, label, { dashed = false } = {}) {
-  if (!el || el.hidden) return [];
+  if (!el || el.closest('[hidden]')) return [];
   const b = boxOf(el);
+  if (!b.w || !b.h) return [];
   const W = site.offsetWidth;
   const H = site.offsetHeight;
   const out = [svg('rect', {
@@ -851,12 +1668,12 @@ function annotate(el, label, { dashed = false } = {}) {
   return out;
 }
 
-/* 正解の赤丸（要素を囲む） */
+/* 正解の赤丸（要素を囲む／点を囲む） */
 function circle(el, label) {
+  if (!el) return [];
   const b = boxOf(el);
-  return loop(b.x + b.w / 2, b.y + b.h / 2, b.w / 2 - 14, b.h / 2 - 4, label, b.x + 18, b.y + b.h + 8);
+  return loop(b.x + b.w / 2, b.y + b.h / 2, Math.max(20, b.w / 2 - 6), Math.max(14, b.h / 2 + 2), label, b.x + 6, b.y + b.h + 10);
 }
-/* 正解の赤丸（点を囲む） */
 function ring(x, y, label) {
   return loop(x, y, 26, 18, label, x + 30, y - 22);
 }
@@ -874,8 +1691,6 @@ function loop(cx, cy, rx, ry, label, lx, ly) {
     svg('text', { x: lx, y: ly, 'dominant-baseline': 'hanging' }, label),
   ];
 }
-
-/* ちがう場所につける × */
 function cross(x, y) {
   const s = 8;
   return [svg('path', {
@@ -885,11 +1700,11 @@ function cross(x, y) {
 }
 
 /* ファーストビューの境目（折り目）。下側は薄く塗る */
+const foldY = () => vp.clientHeight;
 function fold(label) {
   const y = foldY();
   const W = site.offsetWidth;
   const H = site.offsetHeight;
-  // 名前は、見本の文字と重なっても読めるよう、赤い札にして書く
   const tagW = label.length * 13 + 16;
   return [
     svg('rect', { x: 0, y, width: W, height: Math.max(0, H - y), fill: PEN, opacity: 0.05 }),
@@ -898,14 +1713,14 @@ function fold(label) {
     svg('text', { x: W - 12 - tagW / 2, y: y - 11, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'tag' }, label),
   ];
 }
-const foldY = () => vp.clientHeight;
 
 /* 余白に斜線と大きさを書く */
-function hatch(x, y, w, hgt, strong = true) {
+function hatch(x, y, w, hgt) {
   const n = Math.max(0, Math.round(hgt));
-  const out = [svg('rect', { x, y, width: Math.max(0, w), height: Math.max(0, hgt), fill: 'url(#hatch)', opacity: strong ? 1 : 0.35 })];
-  if (strong) out.push(svg('text', { x: x + w - 10, y: y + hgt / 2, 'text-anchor': 'end', 'dominant-baseline': 'middle' }, `${n}px`));
-  return out;
+  return [
+    svg('rect', { x, y, width: Math.max(0, w), height: Math.max(0, hgt), fill: 'url(#hatch)' }),
+    svg('text', { x: x + w - 10, y: y + hgt / 2, 'text-anchor': 'end', 'dominant-baseline': 'middle' }, `${n}px`),
+  ];
 }
 function gaps() {
   const menu = part('menu');
@@ -932,7 +1747,7 @@ function rules() {
   const out = [];
   for (let i = 0; i <= n; i++) {
     const y = b.y + i * lh;
-    out.push(svg('path', { d: `M${b.x - 8} ${y} L${b.x + b.w} ${y}`, stroke: PEN, 'stroke-width': i === 0 || i === 1 ? 1.5 : 1, opacity: i <= 1 ? 1 : 0.6 }));
+    out.push(svg('path', { d: `M${b.x - 8} ${y} L${b.x + b.w} ${y}`, stroke: PEN, 'stroke-width': i <= 1 ? 1.5 : 1, opacity: i <= 1 ? 1 : 0.6 }));
   }
   out.push(svg('text', { x: b.x, y: b.y - 8 }, t('terms.lineHeight.rule', { px: Math.round(lh) })));
   return out;
@@ -940,7 +1755,17 @@ function rules() {
 
 /* ============================================================
    用語ごとの中身
+   - page / focus：見本のどのページの、どこを見せるか
+   - items：「見る」のボタンで示す場所
+   - touch()：「触る」のパネル
+   - check：「確かめる」。inSample なら見本をクリックして答える
+   - on：見本で起きたこと（タブを押した、など）を受け取る
    ============================================================ */
+const sampleMarks = (target) => (a) => (a.correct
+  ? circle(part(target), t('app.ok'))
+  : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]);
+const eventLine = () => (state.event ? h('p', { class: 'event' }, state.event) : null);
+
 const LESSONS = {
   header: {
     hoverNames: true,
@@ -950,12 +1775,7 @@ const LESSONS = {
     touch() {
       return [
         h('p', {}, T('touch.p1')),
-        h('label', { class: 'switch' },
-          h('input', {
-            type: 'checkbox', role: 'switch', checked: state.hidden,
-            on: { change: (e) => { state.hidden = e.target.checked; applySite(); renderPanel(); draw(); } },
-          }),
-          T('touch.switch')),
+        toggle(T('touch.switch'), state.hidden, (v) => { state.hidden = v; }),
         state.hidden ? h('p', {}, T('touch.after')) : null,
       ];
     },
@@ -966,23 +1786,30 @@ const LESSONS = {
         if (el.closest('[data-part="header"]')) return { correct: true, msg: name === 'header' ? 'correct' : 'correctSub', name };
         return { correct: false, msg: 'wrong', name };
       },
-      marks: (a) => (a.correct ? circle(part('header'), t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+      marks: sampleMarks('header'),
     },
   },
 
   nav: {
     hoverNames: true,
     main: () => part('nav'),
-    items: Object.fromEntries(['menu', 'about', 'info', 'news'].map((id) => [id, () => site.querySelector(`[data-go="${id}"]`)])),
+    items: Object.fromEntries(['menu', 'about', 'info', 'news', 'reserve'].map((id) => [id,
+      () => site.querySelector(`.s-nav [data-go="${id === 'menu' || id === 'reserve' ? id : `home#${id}`}"]`)])),
     lookMarks: () => annotate(part('nav'), t('parts.nav')),
+    allowNav: (link) => state.step === 'touch' && !!link.closest('.s-nav'),
+    on: {
+      go({ label }) {
+        state.event = T('touch.moved', { name: label });
+        renderPanel();
+      },
+    },
     touch() {
       return [
         h('p', {}, T('touch.p1')),
-        state.moved ? h('p', {}, T('touch.moved', { name: t(`parts.${state.moved}`) })) : null,
-        state.moved ? h('p', { class: 'sub' }, T('touch.back')) : null,
-        state.moved ? h('div', { class: 'actions' }, h('button', {
-          type: 'button', class: 'btn quiet',
-          on: { click: () => { vp.scrollTo({ top: 0, behavior: 'smooth' }); } },
+        eventLine(),
+        state.event ? h('p', { class: 'sub' }, T('touch.back')) : null,
+        state.event ? h('div', { class: 'actions' }, h('button', {
+          type: 'button', class: 'btn quiet', on: { click: () => { go('home'); draw(); } },
         }, T('touch.top'))) : null,
       ];
     },
@@ -995,7 +1822,7 @@ const LESSONS = {
         if (el.closest('[data-part="header"]')) return { correct: false, msg: 'near', name };
         return { correct: false, msg: 'wrong', name };
       },
-      marks: (a) => (a.correct ? circle(part('nav'), t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+      marks: sampleMarks('nav'),
     },
   },
 
@@ -1004,21 +1831,20 @@ const LESSONS = {
     items: { logo: () => part('logo'), nav: () => part('nav'), hero: () => part('hero') },
     lookMarks: () => fold(T('fold')),
     touch() {
-      const out = h('div', { class: 'verdict', id: 'fv-out' });
+      const out = h('div', { class: 'verdict' });
       const update = () => {
         const targets = {
           logo: part('logo'), nav: part('nav'),
-          title: $('.s-hero h1'), button: $('.s-hero .s-btn'), art: $('.s-hero svg'),
+          title: $('.s-hero h1'), button: $('.s-hero .s-btn'), art: $('.s-hero > svg'),
         };
         const inside = [], outside = [];
         for (const [k, el] of Object.entries(targets)) {
           const b = boxOf(el);
           (b.y + b.h <= foldY() + 1 ? inside : outside).push(T(`touch.targets.${k}`));
         }
-        const sep = '、';
         out.replaceChildren(
-          h('p', {}, T('touch.inside', { list: inside.join(sep) || T('touch.none') })),
-          h('p', {}, T('touch.outside', { list: outside.join(sep) || T('touch.none') })),
+          h('p', {}, T('touch.inside', { list: inside.join('、') || T('touch.none') })),
+          h('p', {}, T('touch.outside', { list: outside.join('、') || T('touch.none') })),
           outside.includes(T('touch.targets.button')) ? h('p', { class: 'sub' }, T('touch.warn')) : null,
         );
       };
@@ -1039,47 +1865,32 @@ const LESSONS = {
       judge(el, x, y) {
         return { correct: y > foldY(), msg: y > foldY() ? 'correct' : 'wrong', name: el.dataset.part };
       },
-      marks: (a) => [...fold(T('check.fold')), ...(a.correct ? ring(a.x, a.y, t('app.ok')) : cross(a.x, a.y))],
+      marks: (a) => [...fold(T('fold')), ...(a.correct ? ring(a.x, a.y, t('app.ok')) : cross(a.x, a.y))],
     },
   },
 
   space: {
     focus: 'menu',
     lookMarks(pinned) {
-      const g = gaps();
-      return Object.entries(g).flatMap(([id, r]) => (!pinned || pinned === id ? hatch(...r) : []));
+      return Object.entries(gaps()).flatMap(([id, r]) => (!pinned || pinned === id ? hatch(...r) : []));
     },
     touch() {
-      const verdict = h('div', { class: 'verdict' });
-      const update = (v) => {
-        const key = v < 0.6 ? 'tight' : v > 1.5 ? 'loose' : 'ok';
-        const [title, body] = T(`touch.${key}`);
-        verdict.replaceChildren(h('p', {}, h('b', {}, title), body));
-      };
-      update(state.space);
-      const row = rangeRow({
-        label: T('touch.label'), min: 0, max: 200, step: 10, value: Math.round(state.space * 100),
+      return sliderLesson({
+        min: 0, max: 200, step: 10, value: Math.round(state.space * 100),
         format: (v) => T('touch.value', { n: v }),
-        onInput: (v) => { state.space = v / 100; applySite(); draw(); update(state.space); },
+        judge: (v) => (v < 60 ? 'tight' : v > 150 ? 'loose' : 'ok'),
+        apply: (v) => { state.space = v / 100; },
+        presets: [[T('touch.zero'), 0], [t('app.reset'), 100]],
       });
-      const set = (v) => { const input = $('input', row); input.value = v; input.dispatchEvent(new Event('input')); };
-      return [
-        h('p', {}, T('touch.p1')),
-        row,
-        verdict,
-        h('div', { class: 'actions' },
-          h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(0) } }, T('touch.zero')),
-          h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(100) } }, t('app.reset'))),
-      ];
     },
-    touchMarks() { return Object.values(gaps()).flatMap((r) => hatch(...r)); },
+    touchMarks: () => Object.values(gaps()).flatMap((r) => hatch(...r)),
     check: {
       inSample: true,
       judge(el) {
         const ok = !!el.closest('[data-part="info"]');
         return { correct: ok, msg: ok ? 'correct' : 'wrong', name: el.dataset.part };
       },
-      marks: (a) => (a.correct ? circle(part('info'), t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+      marks: sampleMarks('info'),
     },
   },
 
@@ -1088,34 +1899,171 @@ const LESSONS = {
     lookVars: () => ({ fs: 15, px: Math.round(15 * state.lh), v: state.lh }),
     lookMarks: () => rules(),
     touch() {
-      const verdict = h('div', { class: 'verdict' });
-      const update = (v) => {
-        const key = v < 1.4 ? 'tight' : v > 2.3 ? 'loose' : 'ok';
-        const [title, body] = T(`touch.${key}`);
-        verdict.replaceChildren(h('p', {}, h('b', {}, title), body));
-      };
-      update(state.lh);
-      const row = rangeRow({
-        label: T('touch.label'), min: 1, max: 3, step: 0.1, value: state.lh,
+      return sliderLesson({
+        min: 1, max: 3, step: 0.1, value: state.lh,
         format: (v) => T('touch.value', { v: round1(v).toFixed(1), px: Math.round(15 * v) }),
-        onInput: (v) => { state.lh = round1(v); applySite(); draw(); update(state.lh); },
+        judge: (v) => (v < 1.4 ? 'tight' : v > 2.3 ? 'loose' : 'ok'),
+        apply: (v) => { state.lh = round1(v); },
+        presets: [[t('app.reset'), DEFAULT.lh]],
       });
-      const set = (v) => { const input = $('input', row); input.value = v; input.dispatchEvent(new Event('input')); };
-      return [
-        h('p', {}, T('touch.p1')),
-        row,
-        verdict,
-        h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(DEFAULT.lh) } }, t('app.reset'))),
-      ];
     },
     touchMarks: () => rules(),
     check: {
-      inSample: false,
       choices: [1.1, 3.0, 1.8],
       answers: ['wrongA', 'wrongB', 'correct'],
     },
   },
+
+  /* ===== 3章 部品 ===== */
+  cta: {
+    hoverNames: true,
+    main: () => part('cta'),
+    items: { cta: () => part('cta'), sublink: () => part('sublink') },
+    lookMarks: () => annotate(part('cta'), t('parts.cta')),
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        toggle(T('touch.switch'), state.ctaWeak, (v) => { state.ctaWeak = v; }),
+        state.ctaWeak ? h('p', {}, T('touch.after')) : null,
+      ];
+    },
+    touchMarks: () => annotate(part('cta'), t('parts.cta')),
+    check: {
+      inSample: true,
+      judge(el) {
+        const name = el.dataset.part;
+        if (el.closest('[data-part="cta"]')) return { correct: true, msg: 'correct', name };
+        if (name === 'sublink') return { correct: false, msg: 'sub', name };
+        return { correct: false, msg: 'wrong', name };
+      },
+      marks: sampleMarks('cta'),
+    },
+  },
+
+  form: {
+    page: 'reserve',
+    hoverNames: true,
+    main: () => part('form'),
+    items: Object.fromEntries(['textbox', 'select', 'radio', 'textarea', 'submit'].map((id) => [id, () => part(id)])),
+    lookMarks: () => annotate($('.s-form'), t('parts.form')),
+    on: {
+      submit({ ok }) { state.event = T(ok ? 'touch.ok' : 'touch.error'); renderPanel(); },
+      formReset() { state.event = null; renderPanel(); },
+    },
+    touch: () => [h('p', {}, T('touch.p1')), eventLine()],
+    check: {
+      inSample: true,
+      judge(el) {
+        const name = el.dataset.part;
+        return { correct: name === 'select', msg: name === 'select' ? 'correct' : 'wrong', name };
+      },
+      marks: (a) => (a.correct ? circle(a.el, t('app.ok')) : [...annotate(a.el, t(`parts.${a.name}`), { dashed: true }), ...cross(a.x, a.y)]),
+    },
+  },
+
+  tabs: {
+    page: 'menu',
+    items: { tabs: () => part('tabs'), tabpanel: () => part('tabpanel') },
+    lookMarks: () => annotate(part('tabs'), t('parts.tabs')),
+    on: {
+      tab({ id, label }) {
+        if (state.step === 'touch') { state.event = T('touch.switched', { name: label }); renderPanel(); }
+        if (state.step === 'check') setAnswer(id === 'cake', id === 'cake' ? 'correct' : 'wrong', { name: label });
+      },
+    },
+    touch: () => [h('p', {}, T('touch.p1')), eventLine()],
+    touchMarks: () => annotate(part('tabs'), t('parts.tabs')),
+    check: { marks: (a) => (a.correct ? circle($('#s-tabs [data-tab="cake"]'), t('app.ok')) : []) },
+  },
+
+  accordion: {
+    page: 'reserve',
+    focus: 'faq',
+    items: { faq: () => $('.s-faq'), summary: () => $('.s-faq summary') },
+    lookMarks: () => annotate($('.s-faq'), t('parts.accordion')),
+    on: {
+      faq({ id, q, open }) {
+        if (state.step === 'touch') { state.event = T(open ? 'touch.opened' : 'touch.closed'); renderPanel(); draw(); }
+        if (state.step === 'check' && open) setAnswer(id === 'parking', id === 'parking' ? 'correct' : 'wrong', { name: q });
+      },
+    },
+    touch: () => [h('p', {}, T('touch.p1')), eventLine()],
+    check: { marks: (a) => (a.correct ? circle($('.s-faq [data-faq="parking"]'), t('app.ok')) : []) },
+  },
+
+  carousel: {
+    focus: 'carousel',
+    items: { slides: () => part('slides'), arrows: () => $('.s-car-ctrl'), dots: () => part('dots') },
+    lookMarks: () => annotate(part('carousel'), t('parts.carousel')),
+    on: {
+      slide({ i }) {
+        const s = t('site.carousel.slides')[i];
+        if (state.step === 'touch') { state.event = T('touch.now', { n: i + 1, title: s.title }); renderPanel(); }
+        if (state.step === 'check') setAnswer(i === 2, i === 2 ? 'correct' : 'wrong', { name: i + 1 });
+      },
+    },
+    touch: () => [h('p', {}, T('touch.p1')), eventLine()],
+    check: { marks: (a) => (a.correct ? circle(part('slides'), t('app.ok')) : []) },
+  },
+
+  modal: {
+    page: 'item',
+    enter(step) { if (step === 'look') openLayer('modal'); },
+    items: { modal: () => $('#s-modal'), backdrop: () => $('#s-backdrop'), close: () => $('#s-modal .s-close') },
+    lookMarks: () => (state.layer === 'modal' ? annotate($('#s-modal'), t('parts.modal')) : annotate(part('photo'), t('parts.photo'))),
+    on: {
+      modal({ open, via }) {
+        if (state.step === 'touch') {
+          state.event = open ? T('touch.opened')
+            : T({ close: 'touch.closedClose', backdrop: 'touch.closedBackdrop', esc: 'touch.closedEsc' }[via]);
+          renderPanel();
+        }
+        if (state.step === 'check' && !open) setAnswer(via !== 'close', via !== 'close' ? 'correct' : 'wrong');
+      },
+    },
+    touch: () => [h('p', {}, T('touch.p1')), eventLine()],
+    touchMarks: () => (state.layer ? [] : annotate(part('photo'), t('parts.photo'))),
+    check: { marks: () => [] },
+  },
+
+  drawer: {
+    compact: true,
+    frameWidth: 390,
+    items: { burger: () => $('#s-burger'), drawer: () => $('#s-drawer') },
+    pinMarks: false,
+    // 「ドロワー」を押したら開いて見せ、「ハンバーガーメニュー」を押したら閉じて見せる
+    onPin(id) {
+      if (id === 'drawer') openLayer('drawer');
+      else closeLayer('pin');
+    },
+    lookMarks: () => (state.layer === 'drawer'
+      ? annotate($('#s-drawer'), t('parts.drawer'))
+      : annotate($('#s-burger'), t('parts.burger'))),
+    allowNav: (link) => state.step !== 'look' && !!link.closest('.s-drawer'),
+    on: {
+      drawer({ open }) {
+        if (state.step === 'touch' && !state.navigating) { state.event = T(open ? 'touch.opened' : 'touch.closed'); renderPanel(); }
+      },
+      go({ target, label }) {
+        if (state.step === 'touch') { state.event = T('touch.moved', { name: label }); renderPanel(); }
+        if (state.step === 'check') setAnswer(target === 'home#info', target === 'home#info' ? 'correct' : 'wrong', { name: label });
+      },
+    },
+    touch: () => [h('p', {}, T('touch.p1')), eventLine()],
+    touchMarks: () => (state.layer ? [] : annotate($('#s-burger'), t('parts.burger'))),
+    check: { marks: (a) => (a.correct ? circle(part('info'), t('app.ok')) : []) },
+  },
 };
+
+/* スイッチ */
+function toggle(label, checked, set) {
+  return h('label', { class: 'switch' },
+    h('input', {
+      type: 'checkbox', role: 'switch', checked,
+      on: { change: (e) => { set(e.target.checked); applySite(); renderPanel(); draw(); } },
+    }),
+    label);
+}
 
 /* つまみ（ラベル・いまの値・スライダー） */
 function rangeRow({ label, min, max, step, value, format, onInput }) {
@@ -1127,25 +2075,63 @@ function rangeRow({ label, min, max, step, value, format, onInput }) {
   });
   return h('div', { class: 'range' }, h('label', { for: id }, label, output), input);
 }
+/* つまみ＋判定＋プリセットのボタン（余白・行間） */
+function sliderLesson({ min, max, step, value, format, judge, apply, presets }) {
+  const verdict = h('div', { class: 'verdict' });
+  const update = (v) => {
+    const [title, body] = T(`touch.${judge(v)}`);
+    verdict.replaceChildren(h('p', {}, h('b', {}, title), body));
+  };
+  update(value);
+  const row = rangeRow({
+    label: T('touch.label'), min, max, step, value, format,
+    onInput: (v) => { apply(v); applySite(); draw(); update(v); },
+  });
+  const set = (v) => { const input = $('input', row); input.value = v; input.dispatchEvent(new Event('input')); };
+  return [
+    h('p', {}, T('touch.p1')),
+    row,
+    verdict,
+    h('div', { class: 'actions' }, presets.map(([label, v]) => h('button', { type: 'button', class: 'btn quiet', on: { click: () => set(v) } }, label))),
+  ];
+}
 
 /* ============================================================
-   画面を組み立てる
+   アプリの画面を組み立てる
    ============================================================ */
-function renderTerms() {
-  $('#terms').replaceChildren(...TERMS.map((id, i) => h('li', {},
-    h('button', {
-      type: 'button',
-      'aria-current': id === state.term ? 'step' : false,
-      on: { click: () => selectTerm(id) },
-    },
-      h('span', { class: 'num' }, String(i + 1).padStart(2, '0')),
-      t(`terms.${id}.name`),
-      state.progress[id] ? h('span', { class: 'stamp', title: t('app.doneLabel'), 'aria-label': t('app.doneLabel') }, t('app.done')) : null))));
+const ready = (id) => !!LESSONS[id];
+const readyTerms = () => TERMS.filter(ready);
+
+function renderBar() {
+  const list = readyTerms();
+  const i = list.indexOf(state.term);
+  $('#prev').disabled = i <= 0;
+  $('#next').disabled = i >= list.length - 1;
+  const done = TERMS.filter((id) => state.progress[id]).length;
+  const text = t('app.progress', { done, total: TERMS.length });
+  $('#bar-progress').textContent = text;
+  $('#list-progress').textContent = text;
+}
+
+function renderList() {
+  $('#list-body').replaceChildren(...CHAPTERS.map((c) => h('section', {},
+    h('h3', {}, t(`app.chapters.${c.id}`)),
+    h('ol', {}, c.terms.map((id) => h('li', {},
+      h('button', {
+        type: 'button',
+        disabled: !ready(id),
+        'aria-current': id === state.term ? 'page' : false,
+        on: { click: () => { $('#list').close(); selectTerm(id); } },
+      },
+        h('span', { class: 'num' }, String(TERMS.indexOf(id) + 1).padStart(2, '0')),
+        h('span', { class: 'name' }, t(`terms.${id}.name`)),
+        !ready(id) ? h('span', { class: 'soon' }, t('app.soon'))
+          : state.progress[id] ? h('span', { class: 'stamp', title: t('app.doneLabel'), 'aria-label': t('app.doneLabel') }, t('app.done')) : null)))))));
 }
 
 function renderPanel() {
-  const L = LESSONS[state.term];
-  const idx = TERMS.indexOf(state.term);
+  const lesson = L();
+  const c = chapterOf(state.term);
 
   const tabs = h('div', { class: 'tabs', role: 'tablist' }, STEPS.map((s, i) => h('button', {
     type: 'button', role: 'tab',
@@ -1155,12 +2141,12 @@ function renderPanel() {
 
   const nextStep = STEPS[STEPS.indexOf(state.step) + 1];
   const nextBtn = nextStep
-    ? h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn', on: { click: () => setStep(nextStep) } }, t('app.next', { step: t(`app.steps.${nextStep}`) })))
+    ? h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn', on: { click: () => setStep(nextStep) } }, t('app.nextStep', { step: t(`app.steps.${nextStep}`) })))
     : null;
 
   let body;
   if (state.step === 'look') {
-    const vars = L.lookVars ? L.lookVars() : undefined;
+    const vars = lesson.lookVars ? lesson.lookVars() : undefined;
     const items = T('look.items');
     body = [
       h('p', {}, T('look.p1', vars)),
@@ -1176,13 +2162,13 @@ function renderPanel() {
       nextBtn,
     ];
   } else if (state.step === 'touch') {
-    body = [...L.touch(), nextBtn];
+    body = [...lesson.touch(), nextBtn];
   } else {
-    body = renderCheck(L);
+    body = renderCheck(lesson);
   }
 
   panel.replaceChildren(
-    h('p', { class: 'count' }, t('app.count', { n: idx + 1, total: TERMS.length })),
+    h('p', { class: 'count' }, t('app.count', { chapter: t(`app.chapters.${c.id}`), n: c.terms.indexOf(state.term) + 1, total: c.terms.length })),
     h('h1', { class: 'term-name' }, T('name')),
     h('p', { class: 'term-en', lang: 'en' }, T('en')),
     h('p', { class: 'lead' }, T('lead')),
@@ -1191,12 +2177,12 @@ function renderPanel() {
   );
 }
 
-function renderCheck(L) {
+function renderCheck(lesson) {
   const a = state.answer;
   const out = [h('p', {}, T('check.q'))];
-  if (L.check.inSample) out.push(h('p', { class: 'sub' }, t('app.keys')));
-  if (L.check.choices) {
-    out.push(h('div', { class: 'choices' }, L.check.choices.map((lh, i) => h('button', {
+  if (lesson.check.inSample) out.push(h('p', { class: 'sub' }, t('app.keys')));
+  if (lesson.check.choices) {
+    out.push(h('div', { class: 'choices' }, lesson.check.choices.map((lh, i) => h('button', {
       type: 'button',
       'aria-pressed': String(!!a && a.choice === i),
       on: { click: () => choose(i) },
@@ -1206,53 +2192,52 @@ function renderCheck(L) {
     out.push(h('div', { class: 'feedback' },
       h('p', {},
         h('span', { class: `label ${a.correct ? 'ok' : 'ng'}` }, t(a.correct ? 'app.ok' : 'app.ng')),
-        T(`check.${a.msg}`, { name: a.name ? t(`parts.${a.name}`) : '' }))));
-    const next = TERMS[TERMS.indexOf(state.term) + 1];
+        T(`check.${a.msg}`, a.vars))));
+    const list = readyTerms();
+    const next = list[list.indexOf(state.term) + 1];
     const actions = h('div', { class: 'actions' });
     if (a.correct && next) actions.append(h('button', { type: 'button', class: 'btn', on: { click: () => selectTerm(next) } }, t('app.nextTerm', { name: t(`terms.${next}.name`) })));
-    if (a.correct && !next && TERMS.every((id) => state.progress[id])) out.push(h('p', { class: 'sub' }, t('app.allDone')));
-    actions.append(h('button', { type: 'button', class: 'btn quiet', on: { click: () => { state.answer = null; renderPanel(); draw(); } } }, t('app.retry')));
+    if (a.correct && !next && list.every((id) => state.progress[id])) out.push(h('p', { class: 'sub' }, t('app.allDone')));
+    actions.append(h('button', { type: 'button', class: 'btn quiet', on: { click: () => setStep('check') } }, t('app.retry')));
     out.push(actions);
   }
   return out;
 }
 
 /* ---- 切り替え ---- */
-function resetTouch() {
-  state.hidden = false;
-  state.moved = null;
-  state.vpH = null;
-  state.space = DEFAULT.space;
-  state.lh = DEFAULT.lh;
-}
-
 function selectTerm(id) {
+  if (!ready(id)) return;
   state.term = id;
+  save(LAST_KEY, id);
   panel.scrollTop = 0;
   if (matchMedia('(max-width: 900px)').matches) window.scrollTo({ top: 0 });
   setStep('look');
 }
 
 function setStep(step) {
+  const lesson = L();
   state.step = step;
   state.hover = null;
   state.pinned = null;
   state.answer = null;
-  resetTouch();
+  resetSample();
   applySite();
+  setPage(lesson.page || 'home');
   if (step === 'touch' && state.term === 'fv') state.vpMax = vp.clientHeight;
-  const L = LESSONS[state.term];
-  scrollStage(step === 'check' && state.term !== 'lineHeight' ? null : L.focus);
-  renderTerms();
+  scrollStage(step === 'check' && !['lineHeight', 'accordion', 'carousel'].includes(state.term) ? null : lesson.focus);
+  lesson.enter?.(step);
+  renderBar();
+  renderList();
   renderPanel();
   draw();
 }
 
 function pin(id) {
   state.pinned = state.pinned === id ? null : id;
-  const L = LESSONS[state.term];
-  const el = state.pinned && L.items && L.items[id] ? L.items[id]() : null;
-  if (el) {
+  L().onPin?.(state.pinned);
+  const items = L().items;
+  const el = state.pinned && items && items[id] ? items[id]() : null;
+  if (el && !el.closest('.s-layer')) {
     // ページ全体は動かさず、見本の枠の中だけをスクロールする
     const b = boxOf(el);
     if (b.y < vp.scrollTop || b.y + b.h > vp.scrollTop + vp.clientHeight) {
@@ -1267,51 +2252,59 @@ function pin(id) {
 function record(correct) {
   if (correct && !state.progress[state.term]) {
     state.progress[state.term] = true;
-    saveProgress();
-    renderTerms();
+    save(STORE_KEY, state.progress);
+    renderBar();
+    renderList();
   }
+}
+function setAnswer(correct, msg, vars, extra = {}) {
+  state.answer = { correct, msg, vars, ...extra };
+  record(correct);
+  renderPanel();
+  draw();
 }
 function answer(target, x, y) {
   const el = target.closest('[data-part]');
   if (!el) return;
-  const r = LESSONS[state.term].check.judge(el, x, y);
-  state.answer = { ...r, el, x, y };
-  record(r.correct);
-  renderPanel();
-  draw();
+  const r = L().check.judge(el, x, y);
+  setAnswer(r.correct, r.msg, { name: t(`parts.${r.name}`) }, { el, name: r.name, x, y });
 }
 function choose(i) {
   const c = LESSONS.lineHeight.check;
-  state.answer = { choice: i, correct: c.answers[i] === 'correct', msg: c.answers[i] };
-  record(state.answer.correct);
-  renderPanel();
+  setAnswer(c.answers[i] === 'correct', c.answers[i], undefined, { choice: i });
+}
+
+/* 見本で起きたことを、いまの用語に知らせる */
+function notify(type, detail = {}) {
+  L()?.on?.[type]?.(detail);
 }
 
 /* ---- 書き込みを描き直す ---- */
 function draw() {
+  positionLayer();
   overlay.setAttribute('width', site.offsetWidth);
   overlay.setAttribute('height', site.offsetHeight);
-  const L = LESSONS[state.term];
+  const lesson = L();
   const marks = [defs()];
   const name = (el) => t(`parts.${el.dataset.part}`);
 
   if (state.step === 'look') {
-    marks.push(...L.lookMarks(state.pinned));
-    if (state.pinned && L.items && L.items[state.pinned]) {
+    marks.push(...lesson.lookMarks(state.pinned));
+    if (state.pinned && lesson.items && lesson.items[state.pinned] && lesson.pinMarks !== false) {
       const it = T('look.items').find((x) => x.id === state.pinned);
-      marks.push(...annotate(L.items[state.pinned](), it.label, { dashed: true }));
-    } else if (L.hoverNames && state.hover && state.hover !== (L.main && L.main())) {
+      marks.push(...annotate(lesson.items[state.pinned](), it.label, { dashed: true }));
+    } else if (lesson.hoverNames && state.hover && state.hover !== (lesson.main && lesson.main())) {
       marks.push(...annotate(state.hover, name(state.hover), { dashed: true }));
     }
   }
-  if (state.step === 'touch' && L.touchMarks) marks.push(...L.touchMarks());
-  if (state.step === 'check' && state.answer && L.check.marks) marks.push(...L.check.marks(state.answer));
+  if (state.step === 'touch' && lesson.touchMarks) marks.push(...lesson.touchMarks());
+  if (state.step === 'check' && state.answer && lesson.check.marks) marks.push(...lesson.check.marks(state.answer));
   overlay.replaceChildren(...marks);
 }
 
 /* ---- 見本のサイトでの操作 ---- */
 site.addEventListener('pointermove', (e) => {
-  if (state.step !== 'look' || state.pinned || !LESSONS[state.term].hoverNames) return;
+  if (state.step !== 'look' || state.pinned || !L().hoverNames) return;
   const el = e.target.closest('[data-part]');
   if (el !== state.hover) { state.hover = el; draw(); }
 });
@@ -1320,28 +2313,39 @@ site.addEventListener('pointerleave', () => {
   state.hover = null;
   draw();
 });
+// 確かめる（見本をクリックして答える）の間は、見本の部品が動かないようにする
+site.addEventListener('mousedown', (e) => {
+  if (isQuiz() && e.target.closest('select, input, textarea')) e.preventDefault();
+}, true);
 site.addEventListener('click', (e) => {
-  const link = e.target.closest('a');
-  if (link) e.preventDefault();  // 見本のリンクでは、ふつうはページを移動しない
-
-  // ナビゲーションの「触る」だけは、本当に移動する
-  if (state.term === 'nav' && state.step === 'touch' && link && link.dataset.go) {
-    state.moved = link.dataset.go;
-    vp.scrollTo({ top: Math.max(0, boxOf(part(link.dataset.go)).y), behavior: 'smooth' });
-    renderPanel();
+  if (isQuiz()) {
+    e.preventDefault();
+    const s = site.getBoundingClientRect();
+    answer(e.target, e.clientX - s.left, e.clientY - s.top);
     return;
   }
-  if (state.step === 'look' && LESSONS[state.term].hoverNames) {
+  const link = e.target.closest('a');
+  if (link) {
+    e.preventDefault();  // 見本のリンクは、用語が許すときだけ本当に移動する
+    const lesson = L();
+    if (link.dataset.go && lesson.allowNav?.(link)) {
+      const target = link.dataset.go;
+      const label = link.textContent;
+      if (state.layer) { state.navigating = true; closeLayer('nav'); state.navigating = false; }
+      go(target);
+      notify('go', { target, label });
+      draw();
+      return;
+    }
+  }
+  if (state.step === 'look' && L().hoverNames) {
     if (state.pinned) { state.pinned = null; renderPanel(); }
     state.hover = e.target.closest('[data-part]');
     draw();
-  } else if (state.step === 'check' && LESSONS[state.term].check.inSample) {
-    const s = site.getBoundingClientRect();
-    answer(e.target, e.clientX - s.left, e.clientY - s.top);
   }
 });
 site.addEventListener('keydown', (e) => {
-  if (state.step !== 'check' || (e.key !== 'Enter' && e.key !== ' ')) return;
+  if (!isQuiz() || (e.key !== 'Enter' && e.key !== ' ')) return;
   const el = e.target.closest('[data-part]');
   if (!el) return;
   e.preventDefault();
@@ -1351,6 +2355,7 @@ site.addEventListener('keydown', (e) => {
 });
 
 new ResizeObserver(() => draw()).observe(site);
+new ResizeObserver(() => draw()).observe(vp);
 // 見本をスクロールしたら、名前を見える位置に書き直す
 let drawQueued = false;
 vp.addEventListener('scroll', () => {
@@ -1359,8 +2364,27 @@ vp.addEventListener('scroll', () => {
   requestAnimationFrame(() => { drawQueued = false; draw(); });
 }, { passive: true });
 
+/* ---- 上の帯と用語一覧 ---- */
+const list = $('#list');
+$('#open-list').addEventListener('click', () => {
+  renderList();
+  list.showModal();
+  list.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'center' });
+});
+$('#close-list').addEventListener('click', () => list.close());
+list.addEventListener('click', (e) => {
+  // 暗い幕（ドロワーの外側）を押したら閉じる
+  if (e.target !== list) return;
+  const r = list.getBoundingClientRect();
+  if (e.clientX > r.right || e.clientX < r.left || e.clientY < r.top || e.clientY > r.bottom) list.close();
+});
+$('#prev').addEventListener('click', () => { const l = readyTerms(); selectTerm(l[l.indexOf(state.term) - 1]); });
+$('#next').addEventListener('click', () => { const l = readyTerms(); selectTerm(l[l.indexOf(state.term) + 1]); });
+
 /* ---- はじめる ---- */
-applyText();
+buildSite();
+const last = load(LAST_KEY, 'header');
+state.term = ready(last) ? last : 'header';
 setStep('look');
 </script>
 </body>
