@@ -181,6 +181,33 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .browser-bar .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
 .browser-bar .url { overflow: hidden; text-overflow: ellipsis; }
 .viewport { flex: 1; min-height: 0; overflow: auto; position: relative; background: #fff; }
+/* ファビコンの用語のときだけ出す、ブラウザのタブとブックマーク */
+.b-tabs[hidden], .b-marks[hidden] { display: none; }
+.b-tabs { position: relative; z-index: 2; display: flex; gap: 2px; padding: 6px 8px 0; background: var(--line); flex: none; }
+.b-tab { flex: 0 1 180px; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 0; border-radius: 6px 6px 0 0; background: none; color: var(--ink-2); font: 12px var(--sans); text-align: left; cursor: default; }
+.b-tab[aria-current="true"] { background: var(--paper-2); color: var(--ink); }
+.b-tab .t { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.b-tabs.icons-only .b-tab { flex: 0 1 44px; justify-content: center; padding: 7px 0; }
+.b-tabs.icons-only .t { display: none; }
+.b-tabs.pick .b-tab { cursor: pointer; }
+@media (hover: hover) { .b-tabs.pick .b-tab:hover { background: var(--paper-2); } }
+.b-marks { display: flex; gap: 18px; padding: 6px 12px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--ink-2); flex: none; overflow: hidden; white-space: nowrap; }
+.b-mark { display: flex; align-items: center; gap: 6px; }
+.b-fav { position: relative; display: block; flex: none; width: 16px; height: 16px; }
+.b-fav svg { display: block; width: 16px; height: 16px; }
+.b-fav.marked { outline: 2.5px solid var(--stage-pen); outline-offset: 3px; border-radius: 3px; }
+.b-fav.marked::after {   /* 赤ペンの名前 */
+  content: attr(data-label);
+  position: absolute;
+  left: -6px;
+  top: calc(100% + 9px);
+  padding: 1px 6px;
+  border-radius: 2px;
+  background: var(--stage-pen);
+  color: #fffaf0;
+  font: 700 12px var(--sans);
+  white-space: nowrap;
+}
 .viewport.locked { overflow: hidden; }
 
 /* ---- 右の説明パネル ---- */
@@ -243,6 +270,15 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 
 /* つまみ */
 .range { margin: 4px 0 16px; }
+/* 文字を書き込む欄（OGP） */
+.field { margin: 0 0 14px; }
+.field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+.field input { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); font: inherit; font-size: 14px; }
+.field input:focus-visible { outline: 2px solid var(--pen); outline-offset: 1px; }
+.field input:disabled { opacity: .5; }
+/* ページに書くコード */
+.code-label { font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+.code { margin: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper-2); font: 12px/1.7 var(--mono); white-space: pre-wrap; word-break: break-all; }
 .range label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600; }
 .range output { font-family: var(--mono); font-size: 13px; font-weight: 400; color: var(--pen); }
 .range input { width: 100%; margin: 10px 0 0; accent-color: var(--pen); }
@@ -367,7 +403,6 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .s-logo { display: flex; align-items: center; gap: 10px; font-family: var(--c-serif); font-weight: 700; font-size: 19px; letter-spacing: .06em; }
 .s-nav ul { display: flex; gap: calc(22px * var(--sp)); margin: 0; padding: 0; list-style: none; font-size: 14px; }
 .s-nav a { border-bottom: 1px solid transparent; padding-bottom: 2px; }
-.s-nav a:hover { border-bottom-color: var(--c-accent); }
 .s-burger { display: none; width: 40px; height: 40px; place-items: center; border: 1px solid var(--c-line); border-radius: 4px; background: none; padding: 0; }
 .s-burger span { display: block; width: 18px; height: 2px; background: var(--c-ink); box-shadow: 0 -6px 0 var(--c-ink), 0 6px 0 var(--c-ink); }
 .site.compact .s-nav { display: none; }
@@ -444,7 +479,6 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
   padding: max(0px, calc(24px * var(--sp) - var(--cm))) max(0px, calc(32px * var(--sp) - var(--cm))) max(0px, calc(56px * var(--sp) - var(--cm)));
 }
 .s-card { display: block; margin: var(--cm); background: var(--c-paper); border: 1px solid var(--c-line); border-radius: 4px; overflow: hidden; }
-.s-card:hover { border-color: var(--c-accent); }
 .s-card .art { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #efe2cb; }
 .s-card .art svg { width: 70%; }
 .s-card .body { padding: var(--cp); }
@@ -538,8 +572,47 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .s-foot-name { font-family: var(--c-serif); font-size: 16px; font-weight: 700; letter-spacing: .06em; margin-bottom: 4px !important; }
 .s-foot-nav ul { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; }
 .s-foot-nav a { border-bottom: 1px solid transparent; }
-.s-foot-nav a:hover { border-bottom-color: currentColor; }
 .s-foot-note { margin-top: 4px !important; color: #bfae95; }
+
+/* ホバー：マウスを乗せたときの変化。.hov は「見る」で、乗せたときの様子を見せる用 */
+.s-btn, .s-arrow, .s-sublink, .s-nav a, .s-card, .s-foot-nav a { transition: background-color .15s, color .15s, border-color .15s; }
+.s-nav a.hov { border-bottom-color: var(--c-accent); }
+.s-btn.hov { background: #6a3c1a; }
+.s-arrow.hov { background: var(--c-accent); border-color: var(--c-accent); color: #fbf6ec; }
+.s-sublink.hov { color: var(--c-accent); }
+.s-card.hov { border-color: var(--c-accent); }
+@media (hover: hover) {   /* 指で触る画面では、色が残らないようにする */
+  .site:not(.no-hover) .s-nav a:hover { border-bottom-color: var(--c-accent); }
+  .site:not(.no-hover):not(.cta-weak) .s-btn:hover { background: #6a3c1a; }
+  .site:not(.no-hover) .s-arrow:hover { background: var(--c-accent); border-color: var(--c-accent); color: #fbf6ec; }
+  .site:not(.no-hover) .s-sublink:hover { color: var(--c-accent); }
+  .site:not(.no-hover) .s-card:hover { border-color: var(--c-accent); }
+  .site:not(.no-hover) .s-foot-nav a:hover { border-bottom-color: currentColor; }
+}
+
+/* スクロールアニメーション：まとまりが見えてきたら現れる（その用語のときだけ） */
+.site.anim [data-reveal] { opacity: 0; transform: translateY(32px); transition: opacity var(--ad, .6s) ease-out, transform var(--ad, .6s) ease-out; }
+.site.anim.side [data-reveal] { transform: translateX(-40px); }
+.site.anim [data-reveal].shown { opacity: 1; transform: none; }
+
+/* OGP：メッセージのアプリで、ページが共有された場面（お店のサイトとは別の見た目） */
+.site.sharing { background: #eceff1; }
+.site.sharing .s-header, .site.sharing .s-footer { display: none; }
+.s-sns { max-width: 480px; margin: 0 auto; padding-bottom: 48px; color: #222; line-height: 1.6; }
+.s-sns-head { margin: 0; padding: 14px 20px; background: #fff; border-bottom: 1px solid #d9dde1; font-weight: 700; font-size: 15px; text-align: center; }
+.s-msg { display: flex; gap: 10px; padding: 20px 16px 0; }
+.s-avatar { flex: none; width: 36px; height: 36px; border-radius: 50%; background: #8fa9ba; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.s-who { font-size: 12px; color: #5b6670; margin: 0 0 4px; }
+.s-bubble { background: #fff; border-radius: 4px 14px 14px 14px; padding: 10px 12px 12px; max-width: 340px; font-size: 14px; }
+.s-bubble > p { margin: 0 0 4px; }
+.s-url { color: #2a62b0; font-size: 13px; word-break: break-all; }
+.s-ogp { display: block; margin-top: 8px; border: 1px solid #d9dde1; border-radius: 10px; overflow: hidden; background: #fff; }
+.s-ogp-img svg { display: block; width: 100%; height: auto; }
+.s-ogp-body { padding: 8px 12px 10px; }
+.s-ogp-site { font-size: 12px; color: #5b6670; margin: 0; }
+.s-ogp-title, .s-ogp-desc { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.s-ogp-title { font-weight: 700; font-size: 14px; }
+.s-ogp-desc { font-size: 13px; color: #5b6670; }
 
 /* 見本サイト自身のレスポンシブ（見本の枠の幅で切り替わる） */
 @container (max-width: 620px) {
@@ -592,10 +665,12 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
   <section class="stage" aria-labelledby="stage-label">
     <span id="stage-label" hidden data-t="app.stageLabel"></span>
     <div class="browser">
+      <div class="b-tabs" id="b-tabs" hidden></div>
       <div class="browser-bar" aria-hidden="true">
         <span class="dots"><i></i><i></i><i></i></span>
         <span class="url" id="url"></span>
       </div>
+      <div class="b-marks" id="b-marks" aria-hidden="true" hidden></div>
       <div class="viewport" id="viewport">
 
         <!-- ここから見本のサイト -->
@@ -705,6 +780,11 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
                 <h2 data-t="site.reserve.faqTitle"></h2>
                 <div class="s-faq" id="s-faq"></div>
               </section>
+            </div>
+
+            <!-- OGP の用語で使う、ページが共有された場面 -->
+            <div data-page="share" hidden>
+              <div class="s-sns" id="s-sns"></div>
             </div>
           </main>
 
@@ -826,6 +906,12 @@ const TEXT = {
       shopInfo: 'お店の情報',
       footerNav: 'フッターのリンク',
       copyright: 'コピーライト',
+      ogp: 'リンクの紹介カード',
+      ogImage: '画像',
+      ogTitle: 'タイトル',
+      ogDesc: '説明文',
+      ogSite: 'サイトの場所',
+      message: 'メッセージ',
     },
     terms: {
       /* ===== 1章 ページの骨組み ===== */
@@ -1468,12 +1554,154 @@ const TEXT = {
       },
 
       /* ===== 4章 動き ===== */
-      hover: { name: 'ホバー', en: 'Hover' },
-      scrollAnim: { name: 'スクロールアニメーション', en: 'Scroll Animation' },
+      hover: {
+        name: 'ホバー',
+        en: 'Hover',
+        lead: 'リンクやボタンに、マウスを乗せること。また、乗せたときに見た目が変わる仕組み。',
+        look: {
+          p1: '見本のリンクやボタンに、マウスを乗せてみましょう。色や線が変わります。マウスが乗っている状態を「ホバー」と言います。',
+          p2: 'この見本では、次のところがホバーで変わります。押すと、マウスを乗せたときの様子を見本で示します。',
+          items: [
+            { id: 'nav', label: 'ナビゲーション', desc: '下に線が出る' },
+            { id: 'cta', label: '席を予約するボタン', desc: '色が濃くなる' },
+            { id: 'arrows', label: 'カルーセルの矢印', desc: '中が塗られる' },
+          ],
+          p3: '見た目が変わると、「ここは押せる」「いまここを選ぼうとしている」と伝わります。押す前に、押せる場所かどうかを確かめられます。',
+          tip: 'スマホのように指で操作する画面には、マウスを乗せる操作がありません。大事な情報を、ホバーしたときだけ見せるのは避けます。',
+        },
+        hovering: 'マウスが乗っている',
+        touch: {
+          p1: '見本のリンクやボタンにマウスを乗せて、変化を確かめましょう。スイッチを入れると、ホバーで見た目が変わらなくなります。',
+          switch: 'ホバーの変化をなくす',
+          over: '{name}にマウスが乗りました。{change}',
+          none: '{name}にマウスが乗りましたが、見た目は変わりません。押せる場所かどうか、わかりにくくなりました。',
+          noMouse: 'この画面ではマウスを使えません。「見る」の項目を押すと、マウスを乗せたときの様子を見られます。',
+          names: { nav: 'ナビゲーションの項目', btn: 'ボタン', arrow: '矢印ボタン', sublink: 'リンク', card: 'カード', foot: 'フッターのリンク' },
+          changes: { nav: '下に線が出ました。', btn: '色が濃くなりました。', arrow: '中が塗られました。', sublink: '文字の色が変わりました。', card: '枠の色が変わりました。', foot: '下に線が出ました。' },
+        },
+        check: {
+          q: 'ホバーについて、正しいのはどれでしょう。',
+          options: [
+            'スマホでも、指を近づけるだけで同じように変わる',
+            '押せる場所だと伝える手がかりになる',
+            'ホバーしないと、リンクは押せない',
+          ],
+          wrongA: 'スマホには、マウスを乗せる操作がありません。指で触れたときには、もう押したことになります。',
+          correct: '見た目が変わることで、押せる場所だと伝わります。',
+          wrongC: 'ホバーしなくても押せます。ホバーは、押す前の手がかりです。',
+        },
+      },
+      scrollAnim: {
+        name: 'スクロールアニメーション',
+        en: 'Scroll Animation',
+        lead: 'スクロールして見えてきたものが、動きながら現れる演出のこと。',
+        look: {
+          p1: '下のボタンを押すか、見本を下へスクロールしてみましょう。見えてきたまとまりが、下からふわっと現れます。',
+          p2: 'まとまりが画面に入ったときに、動きを始めています。いちばん上へ戻ってからもう一度スクロールすると、また現れます。',
+          p3: '動きがあると目を引き、「ここから新しい話」と伝えられます。ただ、動きすぎると読みにくく、気分が悪くなる人もいます。',
+          tip: '動きが苦手な人のために、パソコンやスマホには「動きを減らす」設定があります。この設定がオンのときは、動きを止めるのが親切です。',
+        },
+        down: '見本を下へスクロールする',
+        up: 'いちばん上へ戻る',
+        touch: {
+          p1: '現れ方と速さを変えて、見本をスクロールしてみましょう。',
+          kinds: { up: '下から', side: '横から', none: '動かさない' },
+          label: '速さ',
+          value: '{v}秒',
+          none: '動きがないと、落ち着いて読めます。動きは、見てほしいところにだけ使うのがコツです。',
+          slow: 'ゆっくりすぎると、読みたいのに待たされてしまいます。',
+          ok: '短く控えめな動きは、読むじゃまをせずに目を引けます。',
+        },
+        check: {
+          q: 'スクロールアニメーションの使い方で、よいのはどれでしょう。',
+          options: [
+            'ページのすべての文字や画像を、大きく動かす',
+            '見てほしいところに、短く控えめに使う',
+            'ゆっくり時間をかけて表示し、待ってもらう',
+          ],
+          wrongA: '全部が動くと、どこを見ればいいかわからず、読みにくくなります。',
+          correct: '動きは、見てほしいところにだけ、短く使うのがコツです。',
+          wrongC: '表示を待たされると、読む前に離れてしまう人もいます。',
+        },
+      },
 
       /* ===== 5章 ページの外側 ===== */
-      favicon: { name: 'ファビコン', en: 'Favicon' },
-      ogp: { name: 'OGP', en: 'Open Graph Protocol' },
+      favicon: {
+        name: 'ファビコン',
+        en: 'Favicon',
+        lead: 'ブラウザのタブなどに表示される、サイトの小さなアイコンのこと。',
+        look: {
+          p1: '見本のブラウザの、いちばん上のタブを見てみましょう。赤い線で囲んだ、ページの名前の横の小さな絵がファビコンです。',
+          p2: 'ファビコンは、次のような場所に表示されます。押すと、その場所を示します。',
+          items: [
+            { id: 'tab', label: 'タブ', desc: 'ページの名前の横' },
+            { id: 'bookmark', label: 'ブックマーク', desc: '保存したページの一覧' },
+          ],
+          p3: 'タブをたくさん開くと、ページの名前が隠れて、ファビコンだけが並びます。そんなときも、ファビコンでどのサイトかを見分けられます。スマホのホーム画面にサイトを追加したときのアイコンにも、同じような絵が使われます。',
+          tip: '"favorite icon"（お気に入りのアイコン）を縮めた言葉です。16px 四方ほどのとても小さな絵なので、形をはっきりさせます。',
+        },
+        mark: 'ファビコン',
+        others: { weather: '天気予報', train: '路線案内', recipe: '料理のレシピ', news: 'ニュース', map: '地図', dict: '辞書' },
+        touch: {
+          p1: 'ファビコンを変えたり、タブをたくさん開いたりして、見え方を確かめましょう。',
+          kinds: { logo: 'お店のマーク', letter: '1文字', none: '設定しない' },
+          many: 'タブをたくさん開く',
+          logo: '小さくても形がはっきりしているので、ひと目でわかります。',
+          letter: '1文字だけでも、ほかのタブと見分けやすくなります。',
+          none: 'ファビコンがないと、ブラウザが用意したマークになり、ほかのサイトと見分けにくくなります。',
+          manyNote: 'タブがせまくなり、ページの名前が隠れました。どのタブかは、ファビコンだけが手がかりです。',
+        },
+        check: {
+          q: 'タブがたくさん開いていて、ページの名前が見えません。ひだまり珈琲店のタブを、ファビコンを手がかりに探してクリック（スマホではタップ）してください。',
+          correct: 'カップの絵のファビコンで、ひだまり珈琲店のタブを見つけられました。',
+          wrong: 'それは「{name}」のタブです。ひだまり珈琲店のマーク（カップの絵）を探してみましょう。',
+        },
+      },
+      ogp: {
+        name: 'OGP',
+        en: 'Open Graph Protocol',
+        lead: 'SNS やメッセージでページを共有したときの、見え方を決める仕組み。',
+        look: {
+          p1: '見本は、メッセージのアプリで、友だちがひだまり珈琲店のページを送ってくれた場面です。赤い線で囲んだ紹介カードの中身を、OGP で決めています。',
+          p2: '紹介カードは、次のものでできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'ogImage', label: '画像', desc: 'og:image で決める' },
+            { id: 'ogTitle', label: 'タイトル', desc: 'og:title で決める' },
+            { id: 'ogDesc', label: '説明文', desc: 'og:description で決める' },
+            { id: 'ogSite', label: 'サイトの場所', desc: '共有されたページの URL から' },
+          ],
+          p3: 'OGP は、ページの中に書いておく「共有されたとき用の紹介文」です。受け取った人は、ページを開く前に、どんなページかがわかります。',
+          tip: 'OGP は Open Graph Protocol の略です。紹介カードの形は、アプリや SNS ごとに少しずつちがいます。',
+        },
+        touch: {
+          p1: 'タイトルと説明文を書きかえてみましょう。紹介カードと、ページに書く内容（いちばん下）が変わります。',
+          title: 'タイトル（og:title）',
+          desc: '説明文（og:description）',
+          switch: 'OGP を設定しない',
+          off: '画像も説明もなく、URL だけになりました。どんなページか、開くまでわかりません。',
+          long: '長すぎる部分は、途中で切れて「…」になります。大事なことは、はじめのほうに書きます。',
+          code: 'ページに書く内容',
+          noCode: '<!-- OGP を書いていない -->',
+        },
+        check: {
+          q: 'OGP を設定すると、何が変わるでしょう。',
+          options: [
+            '検索結果で、上のほうに出やすくなる',
+            'SNS やメッセージで共有したときの見え方',
+            'ブラウザのタブに出る、小さなアイコン',
+          ],
+          wrongA: 'OGP は、検索結果の順番を決めるものではありません。共有したときの見え方を決めます。',
+          correct: '共有されたときに出る画像・タイトル・説明文を決められます。',
+          wrongC: 'それはファビコンです。OGP は、共有されたときの紹介カードを決めます。',
+        },
+        sns: {
+          url: 'chat.example/',
+          app: 'メッセージ',
+          who: 'あおい',
+          initial: 'あ',
+          msg: 'この前行ったお店、よかったよ。朝ごはんにおすすめ。',
+        },
+      },
     },
 
     /* ---------- 見本のサイトの文章 ---------- */
@@ -1580,6 +1808,11 @@ const TEXT = {
           { id: 'beans', q: '豆だけ買えますか？', a: 'はい。ひだまりブレンドの豆を、200グラム1,200円でお分けしています。' },
         ],
       },
+      ogp: {
+        title: 'ひだまり珈琲店｜駅から3分の小さな喫茶店',
+        desc: '毎朝7時に開く、席が12だけの喫茶店です。深煎りのひだまりブレンドと、季節のケーキをどうぞ。',
+        catch: '駅から3分の、小さな喫茶店',
+      },
       footer: {
         address: 'ひだまり町1-2-3（ひだまり駅から歩いて3分）',
         hours: '7:00〜18:00 ／ 水曜日休み',
@@ -1603,7 +1836,7 @@ const TERMS = CHAPTERS.flatMap((c) => c.terms);
 const chapterOf = (id) => CHAPTERS.find((c) => c.terms.includes(id));
 const STEPS = ['look', 'touch', 'check'];
 const DEFAULT = { space: 1, lh: 1.8 };
-const PATHS = { home: '', menu: 'menu/', item: 'menu/{id}/', reserve: 'reserve/' };
+const PATHS = { home: '', menu: 'menu/', item: 'menu/{id}/', reserve: 'reserve/', share: '' };
 
 let lang = 'ja';
 const t = (key, vars) => {
@@ -1641,6 +1874,15 @@ const state = {
   cols: null,       // グリッド：列の数（null なら幅に合わせて自動）
   frameW: null,     // レスポンシブ：見本の幅（null なら広げられるだけ）
   wMax: 0,
+  noHover: false,   // ホバー：変化をなくしているか
+  hoverEl: null,    // ホバー：いまマウスが乗っている部品
+  anim: 'up',       // スクロールアニメーション：'up' | 'side' | 'none'
+  animDur: 0.6,     // スクロールアニメーション：秒
+  fav: 'logo',      // ファビコン：'logo' | 'letter' | 'none'
+  manyTabs: false,  // ファビコン：タブをたくさん開いているか
+  ogOff: false,     // OGP：設定していないか
+  ogTitle: '',
+  ogDesc: '',
   vpH: null,        // ファーストビュー：見本の画面の高さ（null ならふつう）
   vpMax: 0,
   space: DEFAULT.space,
@@ -1725,6 +1967,8 @@ function buildSite() {
   }, label)));
 
   buildForm();
+  buildShare();
+  site.querySelectorAll('[data-page="home"] .s-section').forEach((el) => { el.dataset.reveal = ''; revealer.observe(el); });
   // 開け閉めは、人が見出しを押したときだけ知らせる（はじめの状態に戻すときは知らせない）
   let pressed = 0;
   $('#s-faq').replaceChildren(...t('site.reserve.faq').map((f) => {
@@ -1785,13 +2029,118 @@ function buildForm() {
   $('#s-form-wrap').replaceChildren(form);
 }
 
+/* ---- OGP：メッセージのアプリで、ページが共有された場面 ---- */
+function ogImage() {
+  const name = t('site.name');
+  return `<svg viewBox="0 0 382 200" aria-hidden="true">
+    <rect width="382" height="200" fill="#f1dcb4"/>
+    <circle cx="300" cy="96" r="58" fill="#e8c995"/>
+    <path d="M252 92h80v24c0 22-18 38-40 38s-40-16-40-38z" fill="#fbf6ec" stroke="#3b2a1f" stroke-width="3"/>
+    <path d="M332 100h7a13 13 0 0 1 0 26h-10" fill="none" stroke="#3b2a1f" stroke-width="3"/>
+    <ellipse cx="292" cy="92" rx="40" ry="7" fill="#6b3d1c" stroke="#3b2a1f" stroke-width="3"/>
+    <text x="28" y="96" font-family="Hiragino Mincho ProN, Yu Mincho, Noto Serif JP, serif" font-size="27" font-weight="700" fill="#3b2a1f">${name}</text>
+    <text x="28" y="128" font-family="sans-serif" font-size="14" fill="#74604f">${t('site.ogp.catch')}</text>
+  </svg>`;
+}
+function buildShare() {
+  const S = (k) => t(`terms.ogp.sns.${k}`);
+  $('#s-sns').replaceChildren(
+    h('p', { class: 's-sns-head' }, S('app')),
+    h('div', { class: 's-msg', 'data-part': 'message' },
+      h('span', { class: 's-avatar', 'aria-hidden': 'true' }, S('initial')),
+      h('div', {},
+        h('p', { class: 's-who' }, S('who')),
+        h('div', { class: 's-bubble' },
+          h('p', {}, S('msg')),
+          h('a', { href: '#', class: 's-url' }, `https://${t('site.host')}`),
+          h('a', { href: '#', class: 's-ogp', id: 's-ogp', 'data-part': 'ogp' },
+            h('div', { class: 's-ogp-img', 'data-part': 'ogImage', html: ogImage() }),
+            h('div', { class: 's-ogp-body' },
+              h('p', { class: 's-ogp-site', 'data-part': 'ogSite' }, t('site.host').replace(/\/$/, '')),
+              h('p', { class: 's-ogp-title', id: 's-ogp-title', 'data-part': 'ogTitle' }),
+              h('p', { class: 's-ogp-desc', id: 's-ogp-desc', 'data-part': 'ogDesc' })))))));
+}
+function renderOgp() {
+  $('#s-ogp').hidden = state.ogOff;
+  $('#s-ogp-title').textContent = state.ogTitle.trim() || t('site.name');
+  $('#s-ogp-desc').textContent = state.ogDesc;
+  $('#s-ogp-desc').hidden = !state.ogDesc.trim();
+}
+const ogCode = () => (state.ogOff ? t('terms.ogp.touch.noCode') : [
+  `<meta property="og:title" content="${state.ogTitle}">`,
+  `<meta property="og:description" content="${state.ogDesc}">`,
+  `<meta property="og:image" content="https://${t('site.host')}ogp.png">`,
+].join('\n'));
+
+/* ---- ファビコン：ブラウザのタブとブックマーク（見本の枠の外側） ---- */
+const FAV = {
+  logo: '<circle cx="8" cy="8" r="8" fill="#f1dcb4"/><path d="M4 7h6v2a3 3 0 0 1-6 0z" fill="#8a5226"/><path d="M10 7.6h1a1.2 1.2 0 0 1 0 2.4h-1" fill="none" stroke="#8a5226" stroke-width="1"/>',
+  letter: '<rect width="16" height="16" rx="3" fill="#8a5226"/><text x="8" y="12.2" text-anchor="middle" font-size="11" font-weight="700" fill="#fbf6ec" font-family="sans-serif">ひ</text>',
+  none: '<circle cx="8" cy="8" r="6.5" fill="none" stroke="#8a8a8a" stroke-width="1.2"/><path d="M1.5 8h13M8 1.5c-2.6 3-2.6 10 0 13M8 1.5c2.6 3 2.6 10 0 13" fill="none" stroke="#8a8a8a" stroke-width="1"/>',
+  weather: '<rect width="16" height="16" rx="3" fill="#3d7fc4"/><circle cx="8" cy="8" r="3.6" fill="#ffd34d"/>',
+  train: '<rect width="16" height="16" rx="3" fill="#2e8b57"/><rect x="4" y="3" width="8" height="8" rx="1.5" fill="#fff"/><rect x="5.2" y="4.4" width="5.6" height="3" fill="#2e8b57"/><path d="M5.5 13.5l1-2.2M10.5 13.5l-1-2.2" stroke="#fff" stroke-width="1.2"/>',
+  recipe: '<rect width="16" height="16" rx="8" fill="#e8742a"/><path d="M3.5 8.5h9a4.5 4.5 0 0 1-9 0z" fill="#fff"/>',
+  news: '<rect width="16" height="16" rx="2" fill="#333"/><path d="M4 5h8M4 8h8M4 11h5" stroke="#fff" stroke-width="1.4"/>',
+  map: '<path d="M8 1a5 5 0 0 1 5 5c0 4-5 9-5 9S3 10 3 6a5 5 0 0 1 5-5z" fill="#1f8a84"/><circle cx="8" cy="6" r="2" fill="#fff"/>',
+  dict: '<rect x="2" y="1" width="12" height="14" rx="1.5" fill="#6b4c9a"/><path d="M5 4.5h6" stroke="#fff" stroke-width="1.4"/>',
+};
+const TAB_SETS = {
+  few: ['hidamari', 'weather', 'train'],
+  many: ['hidamari', 'weather', 'train', 'recipe', 'news', 'map', 'dict', 'news', 'weather', 'map', 'train', 'dict'],
+  // 確かめる用：ひだまり珈琲店のタブを、まん中より右に混ぜておく
+  check: ['news', 'map', 'weather', 'dict', 'train', 'recipe', 'map', 'hidamari', 'news', 'weather', 'dict', 'train'],
+};
+const tabTitle = (id) => (id === 'hidamari' ? t('site.name') : t(`terms.favicon.others.${id}`));
+const favSvg = (id) => `<svg viewBox="0 0 16 16" aria-hidden="true">${FAV[id === 'hidamari' ? state.fav : id]}</svg>`;
+function renderChrome() {
+  const on = state.term === 'favicon';
+  $('#b-tabs').hidden = !on;
+  $('#b-marks').hidden = !on;
+  if (!on) return;
+  const check = state.step === 'check';
+  $('#b-marks').hidden = check;   // 確かめるでは、名前が見えるブックマークは隠す（答えがわかってしまうため）
+  const list = TAB_SETS[check ? 'check' : state.manyTabs ? 'many' : 'few'];
+  // 赤ペンで囲むファビコン：見るでは押した項目、触るではタブ、確かめるでは正解したタブ
+  const markTab = check ? (state.answer?.correct ? state.answer.tab : -1) : state.pinned === 'bookmark' ? -1 : 0;
+  const markLabel = check ? t('app.ok') : t('terms.favicon.mark');
+  const fav = (id, marked) => h('span', { class: `b-fav${marked ? ' marked' : ''}`, 'data-label': markLabel, html: favSvg(id) });
+  const tabs = $('#b-tabs');
+  tabs.classList.toggle('icons-only', check || state.manyTabs);
+  tabs.classList.toggle('pick', check);
+  tabs.setAttribute('aria-hidden', String(!check));
+  tabs.replaceChildren(...list.map((id, i) => h('button', {
+    type: 'button', class: 'b-tab', tabindex: check ? 0 : -1,
+    'aria-current': String(!check && i === 0), 'aria-label': tabTitle(id),
+    on: { click: () => pickTab(id, i) },
+  }, fav(id, i === markTab), h('span', { class: 't' }, tabTitle(id)))));
+  $('#b-marks').replaceChildren(...['hidamari', 'weather', 'recipe'].map((id) => h('span', { class: 'b-mark' },
+    fav(id, !check && state.pinned === 'bookmark' && id === 'hidamari'), tabTitle(id))));
+}
+function pickTab(id, i) {
+  if (state.term !== 'favicon' || state.step !== 'check') return;
+  const ok = id === 'hidamari';
+  setAnswer(ok, ok ? 'correct' : 'wrong', { name: tabTitle(id) }, { tab: i });
+}
+
+/* ---- スクロールアニメーション：見えてきたまとまりに .shown をつける ---- */
+// 見本の枠の下から入ってきたら現れ、下へ出ていったら元に戻す（上へ戻ってスクロールし直すと、また現れる）
+// 12% 見えたら現れる。まったく見えなくなった（0）ときに、下にあれば戻す
+const revealer = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.intersectionRatio >= 0.12) e.target.classList.add('shown');
+    else if (!e.isIntersecting && e.rootBounds && e.boundingClientRect.top >= e.rootBounds.bottom - 1) e.target.classList.remove('shown');
+  }
+}, { root: vp, threshold: [0, 0.12] });
+
 /* ---- ページの切り替え ---- */
 function setPage(page, { keepScroll = false } = {}) {
   state.page = page;
   site.querySelectorAll('[data-page]').forEach((el) => { el.hidden = el.dataset.page !== page; });
-  $('#url').textContent = t('site.host') + PATHS[page].replace('{id}', state.item);
+  $('#url').textContent = page === 'share' ? t('terms.ogp.sns.url') : t('site.host') + PATHS[page].replace('{id}', state.item);
+  site.classList.toggle('sharing', page === 'share');
   if (page === 'menu') setTab(state.tab);
   if (page === 'item') buildItem();
+  if (page === 'share') renderOgp();
   buildCrumbs();
   if (!keepScroll) vp.scrollTop = 0;
 }
@@ -1934,6 +2283,12 @@ function applySite() {
   site.style.setProperty('--cp', `${state.cp}px`);
   site.classList.toggle('plain', state.plain);
   $('#s-grid').style.gridTemplateColumns = state.cols ? `repeat(${state.cols}, minmax(0, 1fr))` : '';
+  site.classList.toggle('no-hover', state.noHover);
+  site.classList.toggle('anim', state.term === 'scrollAnim' && state.anim !== 'none');
+  site.classList.toggle('side', state.anim === 'side');
+  site.style.setProperty('--ad', `${state.animDur}s`);
+  renderChrome();
+  renderOgp();
   site.classList.toggle('compact', !!lesson.compact);
   site.querySelector('[data-part="info"]').classList.toggle('cramped', state.term === 'space' && state.step === 'check');
   // 見本の画面の大きさ（ファーストビューの高さ、ドロワーのスマホ幅）
@@ -1962,6 +2317,16 @@ function resetSample() {
   state.plain = false;
   state.cols = null;
   state.frameW = null;
+  state.noHover = false;
+  state.hoverEl = null;
+  site.querySelectorAll('.hov').forEach((el) => el.classList.remove('hov'));
+  state.anim = 'up';
+  state.animDur = 0.6;
+  state.fav = 'logo';
+  state.manyTabs = false;
+  state.ogOff = false;
+  state.ogTitle = t('site.ogp.title');
+  state.ogDesc = t('site.ogp.desc');
   state.vpH = null;
   state.space = DEFAULT.space;
   state.lh = DEFAULT.lh;
@@ -2630,6 +2995,124 @@ const LESSONS = {
     },
   },
 
+  hover: {
+    items: { nav: () => $('.s-nav a'), cta: () => part('cta'), arrows: () => $('#s-next') },
+    // 項目を押したら、その部品にマウスを乗せたときの見た目にする
+    onPin(id) {
+      site.querySelectorAll('.hov').forEach((el) => el.classList.remove('hov'));
+      if (id) L().items[id]().classList.add('hov');
+    },
+    lookMarks: () => (state.hoverEl && !state.pinned ? annotate(state.hoverEl, T('hovering'), { dashed: true }) : []),
+    touch() {
+      const mouse = matchMedia('(hover: hover)').matches;
+      return [
+        h('p', {}, T('touch.p1')),
+        toggle(T('touch.switch'), state.noHover, (v) => { state.noHover = v; state.event = null; }),
+        eventLine(),
+        mouse ? null : h('p', { class: 'sub' }, T('touch.noMouse')),
+      ];
+    },
+    touchMarks: () => (state.hoverEl ? annotate(state.hoverEl, T('hovering'), { dashed: true }) : []),
+    check: {
+      choices: [0, 1, 2],
+      choice: (i) => h('span', { class: 'sample' }, T('check.options')[i]),
+      answers: ['wrongA', 'correct', 'wrongC'],
+    },
+  },
+
+  scrollAnim: {
+    lookMarks: () => [],
+    lookExtra: () => scrollButtons(),
+    touch() {
+      const note = h('p', { class: 'event' });
+      const update = () => { note.textContent = T(state.anim === 'none' ? 'touch.none' : state.animDur > 1.2 ? 'touch.slow' : 'touch.ok'); };
+      update();
+      const kind = (k) => h('button', {
+        type: 'button', class: 'btn quiet', 'aria-pressed': String(state.anim === k),
+        on: { click: () => { state.anim = k; applySite(); renderPanel(); } },
+      }, T(`touch.kinds.${k}`));
+      return [
+        h('p', {}, T('touch.p1')),
+        h('div', { class: 'actions' }, ['up', 'side', 'none'].map(kind)),
+        state.anim === 'none' ? null : h('div', { style: 'margin-top:16px' }, rangeRow({
+          label: T('touch.label'), min: 0.2, max: 2, step: 0.1, value: state.animDur,
+          format: (v) => T('touch.value', { v: round1(v).toFixed(1) }),
+          onInput: (v) => { state.animDur = round1(v); applySite(); update(); },
+        })),
+        note,
+        scrollButtons(),
+      ];
+    },
+    check: {
+      choices: [0, 1, 2],
+      choice: (i) => h('span', { class: 'sample' }, T('check.options')[i]),
+      answers: ['wrongA', 'correct', 'wrongC'],
+    },
+  },
+
+  favicon: {
+    items: { tab: () => null, bookmark: () => null },
+    pinMarks: false,
+    lookMarks: () => [],
+    touch() {
+      const kind = (k) => h('button', {
+        type: 'button', class: 'btn quiet', 'aria-pressed': String(state.fav === k),
+        on: { click: () => { state.fav = k; renderChrome(); renderPanel(); } },
+      }, T(`touch.kinds.${k}`));
+      return [
+        h('p', {}, T('touch.p1')),
+        h('div', { class: 'actions' }, ['logo', 'letter', 'none'].map(kind)),
+        h('p', { class: 'event' }, T(`touch.${state.fav}`)),
+        toggle(T('touch.many'), state.manyTabs, (v) => { state.manyTabs = v; }),
+        state.manyTabs ? h('p', {}, T('touch.manyNote')) : null,
+      ];
+    },
+    check: { marks: () => [] },
+  },
+
+  ogp: {
+    page: 'share',
+    hoverNames: true,
+    main: () => part('ogp'),
+    items: Object.fromEntries(['ogImage', 'ogTitle', 'ogDesc', 'ogSite'].map((id) => [id, () => part(id)])),
+    lookMarks: () => annotate(part('ogp'), t('parts.ogp')),
+    touch() {
+      const note = h('p', { class: 'sub' });
+      const code = h('pre', { class: 'code' }, ogCode());
+      const update = () => {
+        renderOgp();
+        code.textContent = ogCode();
+        draw();
+        // 2行に収まらず切れたら、そう伝える
+        const cut = !state.ogOff && ['#s-ogp-title', '#s-ogp-desc'].some((sel) => { const el = $(sel); return el.scrollHeight > el.clientHeight + 1; });
+        note.textContent = cut ? T('touch.long') : '';
+      };
+      requestAnimationFrame(update);
+      const field = (key, label, max) => {
+        const id = `og-${key}`;
+        return h('div', { class: 'field' },
+          h('label', { for: id }, label),
+          h('input', { id, type: 'text', value: state[key], maxlength: max, disabled: state.ogOff, on: { input: (e) => { state[key] = e.target.value; update(); } } }));
+      };
+      return [
+        h('p', {}, T('touch.p1')),
+        field('ogTitle', T('touch.title'), 80),
+        field('ogDesc', T('touch.desc'), 140),
+        note,
+        toggle(T('touch.switch'), state.ogOff, (v) => { state.ogOff = v; }),
+        state.ogOff ? h('p', {}, T('touch.off')) : null,
+        h('p', { class: 'code-label' }, T('touch.code')),
+        code,
+      ];
+    },
+    touchMarks: () => (state.ogOff ? [] : annotate(part('ogp'), t('parts.ogp'))),
+    check: {
+      choices: [0, 1, 2],
+      choice: (i) => h('span', { class: 'sample' }, T('check.options')[i]),
+      answers: ['wrongA', 'correct', 'wrongC'],
+    },
+  },
+
   stickyHeader: {
     main: () => part('header'),
     lookMarks: () => annotate(part('header'), t('parts.header')),
@@ -3063,6 +3546,7 @@ function notify(type, detail = {}) {
 /* ---- 書き込みを描き直す ---- */
 function draw() {
   positionLayer();
+  if (state.term === 'favicon') renderChrome();
   overlay.setAttribute('width', site.offsetWidth);
   overlay.setAttribute('height', site.offsetHeight);
   const lesson = L();
@@ -3082,6 +3566,25 @@ function draw() {
   if (state.step === 'check' && state.answer && lesson.check.marks) marks.push(...lesson.check.marks(state.answer));
   overlay.replaceChildren(...marks);
 }
+
+/* ---- ホバー：マウスが乗った部品を覚えて、触るでは何が変わったかを知らせる ---- */
+const HOVERABLE = { nav: '.s-nav a', btn: '.s-btn', arrow: '.s-arrow', sublink: '.s-sublink', card: '.s-card', foot: '.s-foot-nav a' };
+const hoverKind = (el) => Object.keys(HOVERABLE).find((k) => el.matches(HOVERABLE[k]));
+function setHoverEl(el) {
+  if (el === state.hoverEl) return;
+  state.hoverEl = el;
+  if (state.step === 'touch' && el) {
+    const k = hoverKind(el);
+    state.event = T(state.noHover ? 'touch.none' : 'touch.over', { name: T(`touch.names.${k}`), change: T(`touch.changes.${k}`) });
+    renderPanel();
+  }
+  draw();
+}
+site.addEventListener('pointerover', (e) => {
+  if (state.term !== 'hover' || e.pointerType !== 'mouse') return;
+  setHoverEl(e.target.closest(Object.values(HOVERABLE).join(', ')));
+});
+site.addEventListener('pointerleave', () => { if (state.term === 'hover') setHoverEl(null); });
 
 /* ---- 見本のサイトでの操作 ---- */
 site.addEventListener('pointermove', (e) => {
