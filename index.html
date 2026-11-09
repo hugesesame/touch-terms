@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>Web Terms</title>
+<title>Touch Terms</title>
 <style>
 /* ============================================================
    アプリ本体の見た目（赤ペンの校正紙）
@@ -834,7 +834,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 const TEXT = {
   ja: {
     app: {
-      name: 'Web Terms',
+      name: 'Touch Terms',
       note: '試作版',
       stageLabel: '見本のサイト',
       list: '用語一覧',
@@ -1818,7 +1818,7 @@ const TEXT = {
         hours: '7:00〜18:00 ／ 水曜日休み',
         links: 'フッターのリンク',
         copy: '© ひだまり珈琲店',
-        note: 'このお店は、Web Terms の練習用につくった架空のお店です。',
+        note: 'このお店は、Touch Terms の練習用につくった架空のお店です。',
       },
     },
   },
@@ -1847,6 +1847,7 @@ const t = (key, vars) => {
 };
 
 /* 進み具合と、最後に開いた用語は、このブラウザの中にだけ覚えておく（使えなくても動く） */
+// 名前は前の仮の名前（Web Terms）のまま。変えると、これまでの進み具合が消えてしまうため
 const STORE_KEY = 'webterms.progress';
 const LAST_KEY = 'webterms.last';
 function load(key, fallback) {
