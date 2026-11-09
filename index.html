@@ -274,6 +274,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .feedback .label.ng { color: var(--ink-2); }
 .event { color: var(--ink); }
 .event b { color: var(--pen); margin-right: 6px; }
+.actions + .event { margin-top: 16px; }   /* ボタンのすぐ下に結果を書くときは、少し離す */
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .btn {
@@ -286,6 +287,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
   font-weight: 600;
 }
 .btn.quiet { background: none; color: var(--ink); border-color: var(--line); font-weight: 400; }
+.btn.quiet[aria-pressed="true"] { border-color: var(--pen); color: var(--pen); box-shadow: inset 0 0 0 1px var(--pen); font-weight: 600; }   /* いま選んでいるもの */
 @media (hover: hover) {
   .btn:hover { opacity: .85; }
   .btn.quiet:hover { background: var(--paper-2); opacity: 1; }
@@ -326,6 +328,8 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .site {
   --sp: 1;
   --lh: 1.8;
+  --cm: 10px;   /* カードのマージン */
+  --cp: 14px;   /* カードのパディング */
   --c-bg: #f7f0e3;
   --c-paper: #fbf6ec;
   --c-ink: #3b2a1f;
@@ -433,12 +437,20 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
 .s-tabs button[aria-selected="true"] { color: var(--c-ink); border-bottom-color: var(--c-accent); font-weight: 600; }
 
 /* カードのグリッド */
-.s-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: calc(20px * var(--sp)); padding: calc(24px * var(--sp)) calc(32px * var(--sp)) calc(56px * var(--sp)); }
-.s-card { display: block; background: var(--c-paper); border: 1px solid var(--c-line); border-radius: 4px; overflow: hidden; }
+.s-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  /* カードどうしの間は、カードのマージン（--cm）でつくる。外まわりは、そのぶん内側の余白を減らす */
+  padding: max(0px, calc(24px * var(--sp) - var(--cm))) max(0px, calc(32px * var(--sp) - var(--cm))) max(0px, calc(56px * var(--sp) - var(--cm)));
+}
+.s-card { display: block; margin: var(--cm); background: var(--c-paper); border: 1px solid var(--c-line); border-radius: 4px; overflow: hidden; }
 .s-card:hover { border-color: var(--c-accent); }
 .s-card .art { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #efe2cb; }
 .s-card .art svg { width: 70%; }
-.s-card .body { padding: 12px 14px 14px; }
+.s-card .body { padding: var(--cp); }
+/* 「カード」の触る用：枠と背景をなくす */
+.site.plain .s-card { border-color: transparent; background: none; }
+.site.plain .s-card .art { background: none; }
 .s-card .name { font-weight: 600; }
 .s-card .name span { display: block; font-family: var(--c-serif); font-weight: 400; font-size: 14px; }
 .s-card p { margin: 4px 0 0; font-size: 13px; color: var(--c-sub); line-height: 1.7; word-break: normal; }   /* 幅がせまいので、文節ではなくふつうに折り返す */
@@ -542,7 +554,7 @@ dialog.list::backdrop { background: rgba(20, 18, 16, .4); }
   .s-pagehead { padding: calc(28px * var(--sp)) calc(20px * var(--sp)) calc(6px * var(--sp)); }
   .s-tabs { margin: calc(12px * var(--sp)) calc(20px * var(--sp)) 0; }
   .s-tabs button { padding: 10px 12px; }
-  .s-grid { grid-template-columns: 1fr 1fr; gap: calc(12px * var(--sp)); padding: calc(20px * var(--sp)) calc(20px * var(--sp)) calc(40px * var(--sp)); }
+  .s-grid { grid-template-columns: 1fr 1fr; padding: max(0px, calc(20px * var(--sp) - var(--cm))) max(0px, calc(20px * var(--sp) - var(--cm))) max(0px, calc(40px * var(--sp) - var(--cm))); }
   .s-card p { display: none; }
   .s-crumbs { padding: calc(16px * var(--sp)) calc(20px * var(--sp)) 8px; }
   .s-item { grid-template-columns: 1fr; padding: calc(18px * var(--sp)) calc(20px * var(--sp)) calc(40px * var(--sp)); }
@@ -1085,8 +1097,64 @@ const TEXT = {
           wrong: 'そこは「{name}」です。ここの余白は足りています。ほかの場所と見比べて、窮屈に見えるところを探してみましょう。',
         },
       },
-      margin: { name: 'マージン', en: 'Margin' },
-      padding: { name: 'パディング', en: 'Padding' },
+      margin: {
+        name: 'マージン',
+        en: 'Margin',
+        lead: '部品の枠の、外側にある余白のこと。',
+        look: {
+          p1: '見本のメニューのページで、カードの枠のまわりに引いた赤い斜線がマージンです。',
+          p2: 'マージンは、となりのものとの距離をつくります。いまは、カード1枚のまわりに {n}px ずつあります。',
+          p3: 'となりのカードとのあいだは、2枚分のマージンを合わせた広さになります。枠の外側を押し広げて、まわりのものを遠ざけるイメージです。',
+          tip: '枠の内側の余白は「パディング」と言います。次の用語で学びます。',
+        },
+        touch: {
+          p1: 'つまみを動かして、カードのマージンを変えてみましょう。',
+          label: 'マージン',
+          value: '{n}px',
+          zero: 'ゼロにする',
+          tight: ['くっつきすぎ', 'カードどうしがくっついて、どこまでが1枚かわかりにくくなりました。'],
+          ok: ['ちょうどいい', '1枚ずつが見分けやすく、同じ仲間にも見えます。'],
+          loose: ['離れすぎ', 'カードがばらばらに見え、一度に見られる数も減りました。'],
+        },
+        check: {
+          q: '見本で、カードのマージン（枠の外側の余白）のところをクリック（スマホではタップ）してください。',
+          correct: 'カードの枠のすぐ外側が、マージンです。',
+          padding: 'そこは、カードの枠の内側の余白（パディング）です。マージンは、枠の外側にあります。',
+          inside: 'そこは、カードの中です。マージンは、カードの枠の外側にあります。',
+          art: 'そこは、カードの写真です。マージンは、カードの枠の外側にあります。',
+          outside: 'そこは、カードから離れた場所です。カードの枠のすぐ外側を探してみましょう。',
+        },
+        tag: 'マージン {n}px',
+      },
+      padding: {
+        name: 'パディング',
+        en: 'Padding',
+        lead: '部品の枠の、内側にある余白のこと。',
+        look: {
+          p1: '見本のメニューのページで、カードの文字のまわりに引いた赤い斜線がパディングです。',
+          p2: 'パディングは、枠と中身（文字）のあいだの余白です。いまは {n}px です。',
+          p3: 'パディングがあると、文字が枠にくっつかず、ゆとりを持って読めます。ボタンの文字のまわりの余白も、パディングです。',
+          tip: '枠（ボーダー）の外側の余白がマージン、内側の余白がパディングです。',
+        },
+        touch: {
+          p1: 'つまみを動かして、カードのパディングを変えてみましょう。',
+          label: 'パディング',
+          value: '{n}px',
+          zero: 'ゼロにする',
+          tight: ['窮屈', '文字が枠にくっついて、窮屈で読みにくくなりました。'],
+          ok: ['ちょうどいい', '文字のまわりにゆとりがあり、読みやすい広さです。'],
+          loose: ['広すぎ', '余白が場所を取りすぎて、文字の入る幅がせまくなりました。'],
+        },
+        check: {
+          q: '見本で、カードのパディング（枠の内側の余白）のところをクリック（スマホではタップ）してください。',
+          correct: 'カードの枠と文字のあいだが、パディングです。',
+          margin: 'そこは、カードの枠の外側の余白（マージン）です。パディングは、枠の内側にあります。',
+          inside: 'そこは、カードの文字です。文字と枠のあいだの余白を探してみましょう。',
+          art: 'そこは、カードの写真です。この見本では、パディングは文字のまわりにあります。',
+          outside: 'そこは、カードから離れた場所です。カードの中で、文字と枠のあいだを探してみましょう。',
+        },
+        tag: 'パディング {n}px',
+      },
       lineHeight: {
         name: '行間',
         en: 'Line Height',
@@ -1114,9 +1182,106 @@ const TEXT = {
         },
         rule: '1行の高さ {px}px',
       },
-      card: { name: 'カード', en: 'Card' },
-      grid: { name: 'グリッド', en: 'Grid' },
-      responsive: { name: 'レスポンシブ', en: 'Responsive Design' },
+      card: {
+        name: 'カード',
+        en: 'Card',
+        lead: '写真・名前・短い説明などを、1枚の札のようにまとめた部品。',
+        look: {
+          p1: '見本のメニューのページで、赤い線で囲んだ1枚がカードです。商品ごとに1枚ずつ並んでいます。',
+          p2: 'このカードは、次のものでできています。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'art', label: '写真', desc: 'ひと目で何かがわかる絵や写真' },
+            { id: 'name', label: '名前と値段', desc: 'いちばん知りたいこと' },
+            { id: 'desc', label: '説明', desc: '短い説明。せまい画面では省くこともある' },
+          ],
+          p3: '1枚のカードに、ひとつの商品の情報がまとまっています。同じ形のカードが並ぶので、見比べやすくなります。カード全体がリンクになっていて、押すと詳しいページへ進めます。',
+          tip: 'トランプやポイントカードのように、1枚の札に見えることから、こう呼ばれます。',
+        },
+        touch: {
+          p1: 'カードの枠と背景をなくすと、どう見えるでしょう。スイッチを入れて見比べてみましょう。カードを押すと、その商品のページへ進みます。',
+          switch: 'カードの枠と背景をなくす',
+          after: '1枚ずつのまとまりが弱くなりました。どこまでが1つの商品かは、すき間だけが頼りです。カードの枠と背景は「ここまでがひとまとまり」とはっきり示しています。',
+          moved: '「{name}」のページへ進みました。カードは全体がリンクになっているので、どこを押しても進めます。',
+          back: 'メニューのページへ戻る',
+        },
+        check: {
+          q: 'カードにまとめるのに向いているのは、どれでしょう。',
+          options: [
+            '商品の一覧（それぞれに写真・名前・値段がある）',
+            '「お店について」の長い文章',
+            '営業時間と定休日の表',
+          ],
+          correct: '同じ形の情報がいくつも並ぶものは、カードにすると見比べやすくなります。',
+          wrongB: '長いひと続きの文章は、カードに分けると、かえって読みにくくなります。',
+          wrongC: '表は、行と列で見比べるほうが向いています。',
+        },
+      },
+      grid: {
+        name: 'グリッド',
+        en: 'Grid',
+        lead: 'ものをそろえて並べるための、目に見えない格子のこと。',
+        look: {
+          p1: '見本のメニューのページで、カードは目に見えない縦の列にそろえて並んでいます。赤い帯の1本1本が列です。',
+          p2: 'いまは{n}列のグリッドです。列の数と、列のあいだの幅を決めておくと、たくさんのものをきれいにそろえて並べられます。',
+          p3: '雑誌や新聞も、目に見えない格子に合わせて文字や写真を並べています。そろっていると、すっきり見えて、目で追いやすくなります。',
+          tip: '列と列のあいだのすき間を「ガター」と呼びます。',
+        },
+        touch: {
+          p1: 'ボタンを押して、グリッドの列の数を変えてみましょう。',
+          cols: '{n}列',
+          auto: 'もとに戻す',
+          1: '1列だと、1枚ずつ大きく見られます。そのかわり、全部を見るには長くスクロールします。',
+          2: '2列は、スマホでよく使われる並べ方です。',
+          3: '3列だと、一度にたくさん見比べられます。',
+          4: '4列だと一度にたくさん見られますが、1枚が小さくなり、文字が窮屈になります。',
+          now: 'いまは{n}列です。画面の幅に合わせて、入るだけ並べています。',
+        },
+        check: {
+          q: '見本のカードの中から、左から2列目にあるカードを、どれでもいいのでクリック（スマホではタップ）してください。',
+          correct: '左から2つ目の縦のならびが、2列目です。',
+          wrong: 'それは{name}列目のカードです。列は縦のならびです。左から2つ目の縦のならびを探してみましょう。',
+          notCard: 'そこはカードではありません。カードの中から探してみましょう。',
+        },
+        colTag: '{n}列目',
+      },
+      responsive: {
+        name: 'レスポンシブ',
+        en: 'Responsive Design',
+        lead: '見る画面の幅に合わせて、ページの並び方が変わるつくりのこと。',
+        look: {
+          p1: 'Web サイトは、パソコンの広い画面でも、スマホのせまい画面でも見られます。見本の幅を変えて、並び方がどう変わるか見てみましょう。',
+          p2: 'この見本では、幅を変えると次のところが変わります。押すと、見本の中で場所を示します。',
+          items: [
+            { id: 'nav', label: 'ナビゲーション', desc: '1行に並びきらないと、折り返す' },
+            { id: 'hero', label: 'ヒーロー', desc: '横に並んでいた文字と絵が、縦に並ぶ' },
+            { id: 'news', label: 'お知らせ', desc: '日付と文が、上下に並ぶ' },
+          ],
+          p3: 'ひとつのサイトが、画面の幅に合わせて並び方を変えることを、レスポンシブ（レスポンシブデザイン）と言います。スマホでサイトを見る人がとても多いので、いまはほとんどのサイトがレスポンシブで作られています。',
+          tip: '並び方が切り替わる幅を「ブレイクポイント」と呼びます。この見本では 620px です。',
+        },
+        wide: 'パソコンの幅',
+        narrow: 'スマホの幅（390px）',
+        small: 'この画面では、見本をパソコンの幅まで広げられません。パソコンで開くと、幅を変えて見比べられます。',
+        width: '幅 {n}px ・ {layout}',
+        layoutWide: 'パソコン向けの並び方',
+        layoutNarrow: 'スマホ向けの並び方',
+        touch: {
+          p1: 'つまみを動かして、見本の幅を変えてみましょう。620px をさかいに、並び方が切り替わります。',
+          label: '見本の幅',
+          value: '{n}px',
+        },
+        check: {
+          q: 'レスポンシブなサイトとは、どんなサイトでしょう。',
+          options: [
+            '画面の幅に合わせて、並び方が変わるサイト',
+            'スマホ専用に、別に作ったサイト',
+            '押したときの反応が速いサイト',
+          ],
+          correct: '1つのサイトが、画面の幅に合わせて並び方を変えます。パソコンでもスマホでも、同じページを読みやすく見られます。',
+          wrongB: 'スマホ専用のサイトを別に作るやり方もあります。レスポンシブは、1つのサイトの並び方を、幅に合わせて変えるつくりです。',
+          wrongC: '「反応が速い」という意味ではありません。画面の幅に「応じて」並び方が変わる、という意味です。',
+        },
+      },
 
       /* ===== 3章 部品 ===== */
       cta: {
@@ -1373,6 +1538,9 @@ const TEXT = {
         { id: 'blend', cat: 'drink', color: '#6b3d1c', name: 'ひだまりブレンド', price: '480円', desc: '深煎りの豆を3種類合わせた、店の看板です。苦みの奥に、ほのかな甘さがあります。' },
         { id: 'aulait', cat: 'drink', color: '#b0835a', name: 'カフェオレ', price: '560円', desc: 'ブレンドを濃いめにいれて、温めた牛乳と半分ずつ合わせています。' },
         { id: 'ginger', cat: 'drink', color: '#d9b779', name: 'ジンジャーミルク', price: '540円', desc: 'しょうがを効かせた、温かい牛乳です。寒い朝におすすめです。' },
+        { id: 'tea', cat: 'drink', color: '#b5562f', name: 'ダージリン', price: '500円', desc: '香りのよい紅茶を、ポットでお出しします。2杯分あります。' },
+        { id: 'cocoa', cat: 'drink', color: '#7b4a2e', name: 'ココア', price: '520円', desc: '純ココアを練って、温めた牛乳でのばしています。' },
+        { id: 'hojicha', cat: 'drink', color: '#b98a5e', name: 'ほうじ茶ラテ', price: '540円', desc: '香ばしいほうじ茶を、牛乳で甘さ控えめに仕上げています。' },
         { id: 'toast', cat: 'food', color: '#d49a52', name: '厚切りトースト', price: '420円', desc: '近くのパン屋さんの食パンを、4センチの厚さに切って焼きます。' },
         { id: 'sand', cat: 'food', color: '#e8c95a', name: 'たまごサンド', price: '620円', desc: 'ゆで卵を粗くつぶして、マヨネーズで和えています。' },
         { id: 'tart', cat: 'cake', color: '#c8763a', name: 'りんごのタルト', price: '520円', desc: '11月だけの季節のケーキです。りんごを薄く切って並べています。' },
@@ -1467,6 +1635,12 @@ const state = {
   heroOff: false,   // ヒーロー：外しているか
   flat: false,      // セクション：見出しと区切りをなくしているか
   unstick: false,   // 固定ヘッダー：固定をやめているか
+  cm: 10,           // マージン：カードのマージン（px）
+  cp: 14,           // パディング：カードのパディング（px）
+  plain: false,     // カード：枠と背景をなくしているか
+  cols: null,       // グリッド：列の数（null なら幅に合わせて自動）
+  frameW: null,     // レスポンシブ：見本の幅（null なら広げられるだけ）
+  wMax: 0,
   vpH: null,        // ファーストビュー：見本の画面の高さ（null ならふつう）
   vpMax: 0,
   space: DEFAULT.space,
@@ -1756,12 +1930,16 @@ function applySite() {
   $('.s-hero').hidden = state.heroOff;
   site.classList.toggle('flat', state.flat);
   site.classList.toggle('sticky', state.term === 'stickyHeader' && !state.unstick);
+  site.style.setProperty('--cm', `${state.cm}px`);
+  site.style.setProperty('--cp', `${state.cp}px`);
+  site.classList.toggle('plain', state.plain);
+  $('#s-grid').style.gridTemplateColumns = state.cols ? `repeat(${state.cols}, minmax(0, 1fr))` : '';
   site.classList.toggle('compact', !!lesson.compact);
   site.querySelector('[data-part="info"]').classList.toggle('cramped', state.term === 'space' && state.step === 'check');
   // 見本の画面の大きさ（ファーストビューの高さ、ドロワーのスマホ幅）
   vp.style.flex = state.vpH ? '0 0 auto' : '';
   vp.style.height = state.vpH ? `${state.vpH}px` : '';
-  const w = lesson.frameWidth;
+  const w = state.frameW || lesson.frameWidth;
   vp.style.width = w ? `min(${w}px, 100%)` : '';
   vp.style.alignSelf = w ? 'center' : '';
   const quiz = isQuiz();
@@ -1779,6 +1957,11 @@ function resetSample() {
   state.heroOff = false;
   state.flat = false;
   state.unstick = false;
+  state.cm = 10;
+  state.cp = 14;
+  state.plain = false;
+  state.cols = null;
+  state.frameW = null;
   state.vpH = null;
   state.space = DEFAULT.space;
   state.lh = DEFAULT.lh;
@@ -1948,6 +2131,117 @@ function rules() {
   out.push(svg('text', { x: b.x, y: b.y - 8 }, t('terms.lineHeight.rule', { px: Math.round(lh) })));
   return out;
 }
+
+/* 赤い札（白い文字） */
+function tagAt(x, y, label) {
+  const w = label.length * 11 + 18;
+  return [
+    svg('rect', { x, y, width: w, height: 22, fill: PEN, rx: 2 }),
+    svg('text', { x: x + w / 2, y: y + 11, 'text-anchor': 'middle', 'dominant-baseline': 'central', class: 'tag' }, label),
+  ];
+}
+
+/* ---- カードの枠・マージン・パディング（メニューのページ） ---- */
+const cards = () => [...site.querySelectorAll('#s-grid .s-card')];
+const rectPath = (r) => `M${r.x} ${r.y}h${r.w}v${r.h}h${-r.w}z`;
+const within = (r, x, y) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+const sides = (el, prop) => {
+  const cs = getComputedStyle(el);
+  return ['Top', 'Right', 'Bottom', 'Left'].map((k) => parseFloat(cs[prop + k]) || 0);
+};
+// 枠（border）・マージンを含めた外側・文字の入れ物・文字の入る範囲
+function cardBoxes(card) {
+  const border = boxOf(card);
+  const [mt, mr, mb, ml] = sides(card, 'margin');
+  const body = $('.body', card);
+  const bb = boxOf(body);
+  const [pt, pr, pb, pl] = sides(body, 'padding');
+  return {
+    border,
+    outer: { x: border.x - ml, y: border.y - mt, w: border.w + ml + mr, h: border.h + mt + mb },
+    body: bb,
+    content: { x: bb.x + pl, y: bb.y + pt, w: bb.w - pl - pr, h: bb.h - pt - pb },
+  };
+}
+// 外側の四角から内側の四角を抜いた部分に斜線を引く
+const hatchRing = (outer, inner) => svg('path', { d: rectPath(outer) + rectPath(inner), fill: 'url(#hatch)', 'fill-rule': 'evenodd' });
+// 札をつけるカード：いちばん下の段の、いちばん左（下に札を書く空きがある）
+function labelCard() {
+  const list = cards();
+  const bottom = Math.max(...list.map((c) => boxOf(c).y));
+  return list.filter((c) => Math.abs(boxOf(c).y - bottom) < 2).sort((a, b) => boxOf(a).x - boxOf(b).x)[0];
+}
+function marginMarks() {
+  const out = cards().map((c) => { const z = cardBoxes(c); return hatchRing(z.outer, z.border); });
+  const c = labelCard();
+  if (c) {
+    const z = cardBoxes(c);
+    out.push(...tagAt(z.outer.x, z.outer.y + z.outer.h + 4, t('terms.margin.tag', { n: state.cm })));
+  }
+  return out;
+}
+function paddingMarks() {
+  const out = cards().map((c) => { const z = cardBoxes(c); return hatchRing(z.body, z.content); });
+  const c = labelCard();
+  if (c) {
+    const z = cardBoxes(c);
+    out.push(...tagAt(z.border.x, z.border.y + z.border.h + 6, t('terms.padding.tag', { n: state.cp })));
+  }
+  return out;
+}
+// クリックした場所が、カードのどこか（マージン・パディング・中身・写真・外）
+function zoneAt(x, y) {
+  for (const card of cards()) {
+    const z = cardBoxes(card);
+    if (within(z.border, x, y)) return { card, zone: !within(z.body, x, y) ? 'art' : within(z.content, x, y) ? 'inside' : 'padding' };
+    if (within(z.outer, x, y)) return { card, zone: 'margin' };
+  }
+  return { zone: 'outside' };
+}
+const boxQuiz = (want) => ({
+  inSample: true,
+  judge(el, x, y) {
+    const { zone } = zoneAt(x, y);
+    return { correct: zone === want, msg: zone === want ? 'correct' : zone, name: el.dataset.part };
+  },
+  marks(a) {
+    if (!a.correct) return cross(a.x, a.y);
+    const { card } = zoneAt(a.x, a.y);
+    const z = card ? cardBoxes(card) : null;
+    return [...(z ? [want === 'margin' ? hatchRing(z.outer, z.border) : hatchRing(z.body, z.content)] : []), ...ring(a.x, a.y, t('app.ok'))];
+  },
+});
+
+/* ---- グリッドの列 ---- */
+function columns() {
+  const cols = [];
+  for (const c of cards()) {
+    const b = boxOf(c);
+    if (!cols.some((k) => Math.abs(k.x - b.x) < 2)) cols.push({ x: b.x, w: b.w });
+  }
+  return cols.sort((a, b) => a.x - b.x);
+}
+const colOf = (card) => columns().findIndex((k) => Math.abs(k.x - boxOf(card).x) < 2);
+function gridMarks(only) {
+  const list = cards().map(boxOf);
+  if (!list.length) return [];
+  const top = Math.min(...list.map((b) => b.y));
+  const bottom = Math.max(...list.map((b) => b.y + b.h));
+  return columns().flatMap((k, i) => (only != null && only !== i ? [] : [
+    svg('rect', { x: k.x, y: top, width: k.w, height: bottom - top, fill: PEN, opacity: 0.07 }),
+    svg('path', { d: `M${k.x} ${top - 8}V${bottom + 8}M${k.x + k.w} ${top - 8}V${bottom + 8}`, stroke: PEN, 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }),
+    ...tagAt(k.x, bottom + 12, t('terms.grid.colTag', { n: i + 1 })),
+  ]));
+}
+
+/* ---- 見本の幅（レスポンシブ） ---- */
+const BREAK = 620;
+// いまの見本の幅と、どちらの並び方か（パネルに書く。見本の上に書くと中身に重なるため）
+function widthText() {
+  const n = site.offsetWidth;
+  return t('terms.responsive.width', { n, layout: t(`terms.responsive.${n <= BREAK ? 'layoutNarrow' : 'layoutWide'}`) });
+}
+const canWiden = () => state.wMax >= 700;
 
 /* トップページのセクションを、ひとつずつ囲んで番号の札をつける */
 function sectionBoxes() {
@@ -2202,6 +2496,137 @@ const LESSONS = {
       choices: [1.1, 3.0, 1.8],
       choice: (lh) => h('span', { class: 'sample', style: `line-height:${lh}` }, T('check.sample')),
       answers: ['wrongA', 'wrongB', 'correct'],
+    },
+  },
+
+  margin: {
+    page: 'menu',
+    focus: 'tabpanel',
+    lookVars: () => ({ n: state.cm }),
+    lookMarks: () => marginMarks(),
+    touch() {
+      return sliderLesson({
+        min: 0, max: 40, step: 2, value: state.cm,
+        format: (v) => T('touch.value', { n: v }),
+        judge: (v) => (v < 4 ? 'tight' : v > 24 ? 'loose' : 'ok'),
+        apply: (v) => { state.cm = v; },
+        presets: [[T('touch.zero'), 0], [t('app.reset'), 10]],
+      });
+    },
+    touchMarks: () => marginMarks(),
+    check: boxQuiz('margin'),
+  },
+
+  padding: {
+    page: 'menu',
+    focus: 'tabpanel',
+    lookVars: () => ({ n: state.cp }),
+    lookMarks: () => paddingMarks(),
+    touch() {
+      return sliderLesson({
+        min: 0, max: 40, step: 2, value: state.cp,
+        format: (v) => T('touch.value', { n: v }),
+        judge: (v) => (v < 6 ? 'tight' : v > 28 ? 'loose' : 'ok'),
+        apply: (v) => { state.cp = v; },
+        presets: [[T('touch.zero'), 0], [t('app.reset'), 14]],
+      });
+    },
+    touchMarks: () => paddingMarks(),
+    check: boxQuiz('padding'),
+  },
+
+  card: {
+    page: 'menu',
+    focus: 'tabpanel',
+    items: { art: () => $('#s-grid .s-card .art'), name: () => $('#s-grid .s-card .name'), desc: () => $('#s-grid .s-card p') },
+    lookMarks: () => annotate(cards()[0], t('parts.card')),
+    allowNav: (link) => state.step === 'touch' && !!link.closest('.s-card'),
+    on: {
+      go({ label }) { state.event = T('touch.moved', { name: label }); renderPanel(); },
+    },
+    touch() {
+      return [
+        h('p', {}, T('touch.p1')),
+        toggle(T('touch.switch'), state.plain, (v) => { state.plain = v; }),
+        state.plain ? h('p', {}, T('touch.after')) : null,
+        eventLine(),
+        state.page !== 'menu' ? h('div', { class: 'actions' }, quietBtn(T('touch.back'), () => {
+          setPage('menu');
+          scrollStage('tabpanel');
+          state.event = null;
+          renderPanel();
+          draw();
+        })) : null,
+      ];
+    },
+    touchMarks: () => (state.page === 'menu' && !state.plain ? annotate(cards()[0], t('parts.card')) : []),
+    check: {
+      choices: [0, 1, 2],
+      choice: (i) => h('span', { class: 'sample' }, T('check.options')[i]),
+      answers: ['correct', 'wrongB', 'wrongC'],
+    },
+  },
+
+  grid: {
+    page: 'menu',
+    focus: 'tabpanel',
+    lookVars: () => ({ n: columns().length }),
+    lookMarks: () => gridMarks(),
+    touch() {
+      const n = columns().length;
+      const btn = (cols, label) => h('button', {
+        type: 'button', class: 'btn quiet', 'aria-pressed': String(state.cols === cols),
+        on: { click: () => { state.cols = cols; applySite(); renderPanel(); draw(); } },
+      }, label);
+      return [
+        h('p', {}, T('touch.p1')),
+        h('div', { class: 'actions' }, [1, 2, 3, 4].map((c) => btn(c, T('touch.cols', { n: c }))), btn(null, T('touch.auto'))),
+        h('p', { class: 'event' }, state.cols ? T(`touch.${state.cols}`) : T('touch.now', { n })),
+      ];
+    },
+    touchMarks: () => gridMarks(),
+    check: {
+      inSample: true,
+      judge(el) {
+        const card = el.closest('.s-card');
+        if (!card) return { correct: false, msg: 'notCard', name: el.dataset.part };
+        const col = colOf(card);
+        return { correct: col === 1, msg: col === 1 ? 'correct' : 'wrong', name: 'card', label: String(col + 1) };
+      },
+      marks: (a) => (a.correct ? [...gridMarks(1), ...circle(a.el.closest('.s-card'), t('app.ok'))] : cross(a.x, a.y)),
+    },
+  },
+
+  responsive: {
+    items: { nav: () => part('nav'), hero: () => part('hero'), news: () => part('news') },
+    lookMarks: () => [],
+    lookExtra() {
+      if (!canWiden()) return [h('p', { class: 'event' }, widthText()), h('p', { class: 'sub' }, T('small'))];
+      const set = (w) => { state.frameW = w; applySite(); renderPanel(); requestAnimationFrame(draw); };
+      return [
+        h('div', { class: 'actions' },
+          h('button', { type: 'button', class: 'btn quiet', 'aria-pressed': String(!state.frameW), on: { click: () => set(null) } }, T('wide')),
+          h('button', { type: 'button', class: 'btn quiet', 'aria-pressed': String(state.frameW === 390), on: { click: () => set(390) } }, T('narrow'))),
+        h('p', { class: 'event' }, widthText()),
+      ];
+    },
+    touch() {
+      if (!canWiden()) return [h('p', {}, T('touch.p1')), h('p', { class: 'event' }, widthText()), h('p', { class: 'sub' }, T('small'))];
+      const now = h('p', { class: 'event' }, widthText());
+      return [
+        h('p', {}, T('touch.p1')),
+        rangeRow({
+          label: T('touch.label'), min: 320, max: state.wMax, step: 10, value: state.frameW || state.wMax,
+          format: (v) => T('touch.value', { n: v }),
+          onInput: (v) => { state.frameW = v; applySite(); now.textContent = widthText(); requestAnimationFrame(draw); },
+        }),
+        now,
+      ];
+    },
+    check: {
+      choices: [0, 1, 2],
+      choice: (i) => h('span', { class: 'sample' }, T('check.options')[i]),
+      answers: ['correct', 'wrongB', 'wrongC'],
     },
   },
 
@@ -2579,7 +3004,8 @@ function setStep(step) {
   applySite();
   setPage(lesson.page || 'home');
   if (step === 'touch' && state.term === 'fv') state.vpMax = vp.clientHeight;
-  scrollStage(step === 'check' && !['lineHeight', 'accordion', 'carousel'].includes(state.term) ? null : lesson.focus);
+  state.wMax = $('.browser').clientWidth;
+  scrollStage(step === 'check' && !['lineHeight', 'accordion', 'carousel', 'margin', 'padding', 'grid'].includes(state.term) ? null : lesson.focus);
   lesson.enter?.(step);
   renderBar();
   renderList();
